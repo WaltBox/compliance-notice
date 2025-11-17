@@ -58,8 +58,8 @@ export async function generateMetadata({ params }: ProgramPageProps) {
     const program: BeagleProgramData = data.data;
 
     return {
-      title: program.pageTitle,
-      description: program.introText.substring(0, 160),
+      title: `Insurance Verification - ${program.propertyManagerName}`,
+      description: `Beagle program for ${program.propertyManagerName}. Renters insurance made simple.`,
     };
   } catch {
     return {
