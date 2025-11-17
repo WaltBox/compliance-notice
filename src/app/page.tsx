@@ -82,17 +82,7 @@ export default function Home() {
         </div>
 
         {/* API Docs */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="text-lg font-bold text-blue-900 mb-3">API Endpoints</h3>
-          <ul className="space-y-2 text-sm text-blue-800 font-mono">
-            <li>• <span className="bg-blue-100 px-2 py-1">GET</span> /api/beagle-programs?slug=...</li>
-            <li>• <span className="bg-blue-100 px-2 py-1">GET</span> /api/admin/beagle-programs</li>
-            <li>• <span className="bg-blue-100 px-2 py-1">GET</span> /api/admin/beagle-programs/[id]</li>
-            <li>• <span className="bg-blue-100 px-2 py-1">POST</span> /api/admin/beagle-programs</li>
-            <li>• <span className="bg-blue-100 px-2 py-1">PUT</span> /api/admin/beagle-programs/[id]</li>
-            <li>• <span className="bg-blue-100 px-2 py-1">PATCH</span> /api/admin/beagle-programs/[id]/publish</li>
-          </ul>
-        </div>
+  
       </div>
     </div>
   );
