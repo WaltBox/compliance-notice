@@ -19,6 +19,7 @@ export default function AdminProgramsListPage() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
   const [total, setTotal] = useState(0);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPrograms = async () => {
@@ -161,11 +162,13 @@ export default function AdminProgramsListPage() {
                               onClick={() => {
                                 const url = `${PUBLIC_DOMAIN}/programs/${program.propertyManagerSlug}`;
                                 navigator.clipboard.writeText(url);
+                                setCopiedId(program.id);
+                                setTimeout(() => setCopiedId(null), 2000);
                               }}
                               className="text-beagle-orange font-semibold hover:underline"
                               title="Copy URL to clipboard"
                             >
-                              Copy
+                              {copiedId === program.id ? '✓ Copied!' : 'Copy'}
                             </button>
                           </>
                         )}
