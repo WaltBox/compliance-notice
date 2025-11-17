@@ -16,29 +16,29 @@ interface ProgramPageProps {
  */
 export default async function ProgramPage({ params }: ProgramPageProps) {
   try {
-    // Fetch program data from API
     const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
     const host = process.env.VERCEL_URL || 'localhost:3000';
     const baseUrl = `${protocol}://${host}`;
     
-    const response = await fetch(`${baseUrl}/api/beagle-programs?slug=${params.slug}`, {
-      cache: 'no-store', // Ensure fresh data on each request
-    });
+    const response = await fetch(
+      `${baseUrl}/api/beagle-programs?slug=${params.slug}`,
+      { cache: 'no-store' }
+    );
 
     if (!response.ok) {
       notFound();
     }
 
-    const data = await response.json();
-    const program: BeagleProgramData = data.data;
+    const json = await response.json();
+    const program = json?.data as BeagleProgramData;
 
-    if (!program) {
+    if (!program?.id) {
       notFound();
     }
 
     return <BeagleProgramPagePreview program={program} />;
   } catch (error) {
-    console.error('Error loading program:', error);
+    console.error('[programs] Error:', error);
     notFound();
   }
 }
@@ -50,27 +50,25 @@ export async function generateMetadata({ params }: ProgramPageProps) {
   try {
     const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
     const host = process.env.VERCEL_URL || 'localhost:3000';
-    const baseUrl = `${protocol}://${host}`;
     
-    const response = await fetch(`${baseUrl}/api/beagle-programs?slug=${params.slug}`);
+    const response = await fetch(
+      `${protocol}://${host}/api/beagle-programs?slug=${params.slug}`,
+      { cache: 'no-store' }
+    );
 
     if (!response.ok) {
-      return {
-        title: 'Program Not Found',
-      };
+      return { title: 'Beagle Notice' };
     }
 
-    const data = await response.json();
-    const program: BeagleProgramData = data.data;
+    const json = await response.json();
+    const program = json?.data as BeagleProgramData;
 
     return {
-      title: `Insurance Verification - ${program.propertyManagerName}`,
-      description: `beagle notice for ${program.propertyManagerName}. Renters insurance made simple.`,
+      title: `Insurance Verification - ${program?.propertyManagerName || 'Beagle Notice'}`,
+      description: 'Beagle notice. Renters insurance made simple.',
     };
   } catch {
-    return {
-      title: 'Beagle Notice',
-    };
+    return { title: 'Beagle Notice' };
   }
 }
 
