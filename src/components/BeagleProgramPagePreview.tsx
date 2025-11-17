@@ -50,7 +50,7 @@ export default function BeagleProgramPagePreview({
               Already have renters insurance?
             </p>
             <p className="text-beagle-dark text-sm mb-4 sm:mb-5">
-              Submit your 3rd party policy to our AI verification system <u><a href={program.insuranceVerificationUrl} target="_blank" rel="noopener noreferrer" className="text-beagle-orange font-semibold hover:underline">here</a></u>.
+              Submit your 3rd party policy to our AI verification system <u><a href={program.insuranceVerificationUrl.startsWith('http') ? program.insuranceVerificationUrl : `https://${program.insuranceVerificationUrl}`} target="_blank" rel="noopener noreferrer" className="text-beagle-orange font-semibold hover:underline">here</a></u>.
             </p>
           </section>
 
