@@ -8,9 +8,7 @@ Admins can now embed external webpages (like https://tools.yourrenterskit.com/..
 
 ### 1. Run Migration
 ```bash
-export DATABASE_URL="postgresql://postgres:Waltbox2001%21%21@db.fanuzxvnvdgmurvvfuuj.supabase.co:5432/postgres?sslmode=require"
-./node_modules/.bin/prisma migrate dev --name add_webview_url
-```
+
 
 ### 2. Start Server
 ```bash

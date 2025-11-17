@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         ...program,
         createdAt: program.createdAt.toISOString(),
         updatedAt: program.updatedAt.toISOString(),
-        products: (program.products as unknown[]) || [],
+        selectedProducts: (program.selectedProducts as any) || [],
       } as BeagleProgramData,
     };
 

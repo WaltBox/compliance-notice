@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
       ...program,
       createdAt: program.createdAt.toISOString(),
       updatedAt: program.updatedAt.toISOString(),
-      products: (program.products as unknown[]) || [],
+      selectedProducts: (program.selectedProducts as any) || [],
     })) as BeagleProgramData[];
 
     const response: PaginatedApiResponse<BeagleProgramData> = {
@@ -89,7 +89,8 @@ export async function POST(request: NextRequest) {
         propertyManagerName: body.propertyManagerName,
         propertyManagerSlug: slug,
         insuranceVerificationUrl: body.insuranceVerificationUrl,
-        selectedAddOns: body.selectedAddOns || [],
+        webviewUrl: body.webviewUrl || null,
+        selectedProducts: body.selectedProducts || [],
         isPublished: false,
       },
     });
@@ -99,7 +100,7 @@ export async function POST(request: NextRequest) {
         ...program,
         createdAt: program.createdAt.toISOString(),
         updatedAt: program.updatedAt.toISOString(),
-        products: (program.products as unknown[]) || [],
+        selectedProducts: (program.selectedProducts as any) || [],
       } as BeagleProgramData,
     };
 

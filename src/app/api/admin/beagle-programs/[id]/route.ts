@@ -29,7 +29,7 @@ export async function GET(
         ...program,
         createdAt: program.createdAt.toISOString(),
         updatedAt: program.updatedAt.toISOString(),
-        products: (program.products as unknown[]) || [],
+        selectedProducts: (program.selectedProducts as any) || [],
       } as BeagleProgramData,
     };
 
@@ -72,12 +72,10 @@ export async function PUT(
       where: { id: params.id },
       data: {
         ...(body.propertyManagerName !== undefined && { propertyManagerName: body.propertyManagerName }),
-        ...(body.pageTitle !== undefined && { pageTitle: body.pageTitle }),
-        ...(body.introText !== undefined && { introText: body.introText }),
+        ...(body.propertyManagerSlug !== undefined && { propertyManagerSlug: body.propertyManagerSlug }),
         ...(body.insuranceVerificationUrl !== undefined && { insuranceVerificationUrl: body.insuranceVerificationUrl }),
-        ...(body.programHeading !== undefined && { programHeading: body.programHeading }),
-        ...(body.programSubheading !== undefined && { programSubheading: body.programSubheading }),
-        ...(body.products !== undefined && { products: body.products }),
+        ...(body.webviewUrl !== undefined && { webviewUrl: body.webviewUrl }),
+        ...(body.selectedProducts !== undefined && { selectedProducts: body.selectedProducts }),
       },
     });
 
@@ -86,7 +84,7 @@ export async function PUT(
         ...updated,
         createdAt: updated.createdAt.toISOString(),
         updatedAt: updated.updatedAt.toISOString(),
-        products: (updated.products as unknown[]) || [],
+        selectedProducts: (updated.selectedProducts as any) || [],
       } as BeagleProgramData,
     };
 

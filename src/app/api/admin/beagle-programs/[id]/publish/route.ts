@@ -48,7 +48,7 @@ export async function PATCH(
         ...updated,
         createdAt: updated.createdAt.toISOString(),
         updatedAt: updated.updatedAt.toISOString(),
-        products: (updated.products as unknown[]) || [],
+        selectedProducts: (updated.selectedProducts as any) || [],
       } as BeagleProgramData,
       message: updated.isPublished ? 'Program published' : 'Program unpublished',
     };
