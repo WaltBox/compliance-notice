@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import type { ApiResponse, UpdateBeagleProgramRequest, BeagleProgramData } from '@/types';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/admin/beagle-programs/[id]
  * Admin endpoint - fetch a single program for editing

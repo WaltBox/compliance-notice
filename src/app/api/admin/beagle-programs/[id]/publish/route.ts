@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import type { ApiResponse, BeagleProgramData } from '@/types';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * PATCH /api/admin/beagle-programs/[id]/publish
  * Admin endpoint - toggle isPublished boolean

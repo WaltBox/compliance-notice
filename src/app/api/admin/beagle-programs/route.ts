@@ -3,6 +3,8 @@ import prisma from '@/lib/prisma';
 import { generateSlug, getDefaultPageTitle, getDefaultProgramSubheading } from '@/lib/utils';
 import type { ApiResponse, CreateBeagleProgramRequest, BeagleProgramData, PaginatedApiResponse } from '@/types';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/admin/beagle-programs
  * Admin endpoint - returns paginated list of programs

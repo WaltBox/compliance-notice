@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import type { ApiResponse, BeagleProgramData } from '@/types';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/beagle-programs?slug={propertyManagerSlug}
  * Returns the program content for public web view (only where isPublished = true)
