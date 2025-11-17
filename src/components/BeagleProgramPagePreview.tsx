@@ -127,8 +127,8 @@ export default function BeagleProgramPagePreview({
                 </div>
                 <div className="flex flex-col">
                   <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-1">Email</p>
-                  <a href="mailto:jack@beagleforpms.com" className="text-beagle-orange font-semibold text-xs hover:underline break-all leading-tight">
-                    jack@beagleforpms.com
+                  <a href="mailto:jack@beagleforpm.com" className="text-beagle-orange font-semibold text-xs hover:underline break-all leading-tight">
+                    jack@beagleforpm.com
                   </a>
                 </div>
               </div>
