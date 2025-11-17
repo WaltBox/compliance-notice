@@ -27,15 +27,15 @@ export default function BeagleProgramPagePreview({
       <main className="py-8 px-4 sm:py-12 lg:py-16">
         <div className="max-w-3xl mx-auto">
           {/* Header Section */}
-          <section className="mb-6">
+          <section className="mb-8 sm:mb-10">
             {/* Page Title: Insurance Verification - PM Name */}
-            <h1 className="text-2xl sm:text-3xl font-bold text-beagle-dark mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold text-beagle-dark mb-6 sm:mb-8">
               <span className="text-beagle-orange">Insurance Verification</span> - {program.propertyManagerName}
             </h1>
 
             {/* Intro Message */}
-            <div className="mb-6">
-              <p className="text-beagle-dark text-base leading-relaxed mb-3">
+            <div className="mb-8 sm:mb-10">
+              <p className="text-beagle-dark text-base leading-relaxed mb-4 sm:mb-5">
                 Your lease requires renters insurance. <span className="font-semibold">Let's get you covered.</span>
               </p>
               <p className="text-beagle-dark text-sm leading-relaxed">
@@ -45,11 +45,11 @@ export default function BeagleProgramPagePreview({
           </section>
 
           {/* Third Party Insurance CTA */}
-          <section className="mb-6">
-            <p className="text-beagle-dark font-semibold mb-2">
+          <section className="mb-8 sm:mb-10">
+            <p className="text-beagle-dark font-semibold mb-3 sm:mb-4">
               Already have renters insurance?
             </p>
-            <p className="text-beagle-dark text-sm mb-4">
+            <p className="text-beagle-dark text-sm mb-4 sm:mb-5">
               Submit your 3rd party policy to our AI verification system <u><a href={program.insuranceVerificationUrl} target="_blank" rel="noopener noreferrer" className="text-beagle-orange font-semibold hover:underline">here</a></u>.
             </p>
           </section>
@@ -57,14 +57,14 @@ export default function BeagleProgramPagePreview({
           {/* Products Section with Header */}
           {program.selectedProducts && program.selectedProducts.length > 0 && (
             <section className="mb-12 sm:mb-16">
-              <h2 className="text-xl font-bold text-beagle-orange mb-6">Beagle Notice:</h2>
-              <div className="space-y-6">
+              <h2 className="text-xl font-bold text-beagle-orange mb-6">Beagle Program:</h2>
+              <div className="space-y-8 sm:space-y-10">
                 {program.selectedProducts.map((product) => (
                   <div
                     key={product.id}
-                    className="border-b border-gray-200 pb-4"
+                    className="border-b border-gray-200 pb-6 sm:pb-8"
                   >
-                    <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-start justify-between mb-3 sm:mb-4">
                       <p className="font-semibold text-beagle-dark">{product.name}</p>
                       {product.price && (
                         <p className="text-beagle-orange font-bold whitespace-nowrap ml-4">
@@ -72,7 +72,7 @@ export default function BeagleProgramPagePreview({
                         </p>
                       )}
                     </div>
-                    <p className="text-sm text-gray-600">{product.description}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed">{product.description}</p>
                   </div>
                 ))}
               </div>
