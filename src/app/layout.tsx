@@ -9,8 +9,8 @@ const bricolageGrotesque = Bricolage_Grotesque({
 });
 
 export const metadata: Metadata = {
-  title: 'Beagle Program Manager',
-  description: 'Admin and public interface for Beagle program notices and webviews',
+  title: 'Beagle Notice Manager',
+  description: 'Admin and public interface for beagle notice notices and webviews',
   icons: {
     icon: '/images/logoforbrowser.png',
   },

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import type { BeagleProgramData, PaginatedApiResponse } from '@/types';
 
 /**
- * Admin page for listing all Beagle programs
+ * Admin page for listing all beagle notices
  * Route: /admin/beagle-programs
  */
 export default function AdminProgramsListPage() {
@@ -52,7 +52,7 @@ export default function AdminProgramsListPage() {
       <header className="bg-white border-b border-gray-200 py-4 px-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-beagle-dark">Beagle Programs</h1>
+            <h1 className="text-3xl font-bold text-beagle-dark">Beagle Notices</h1>
             <p className="text-gray-600 mt-1">{total} program(s)</p>
           </div>
           <Link

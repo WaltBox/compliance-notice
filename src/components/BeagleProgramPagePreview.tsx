@@ -57,7 +57,7 @@ export default function BeagleProgramPagePreview({
           {/* Products Section with Header */}
           {program.selectedProducts && program.selectedProducts.length > 0 && (
             <section className="mb-12 sm:mb-16">
-              <h2 className="text-xl font-bold text-beagle-orange mb-6">Beagle Program:</h2>
+              <h2 className="text-xl font-bold text-beagle-orange mb-6">Beagle Notice:</h2>
               <div className="space-y-6">
                 {program.selectedProducts.map((product) => (
                   <div

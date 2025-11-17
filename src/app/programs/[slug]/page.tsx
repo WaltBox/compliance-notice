@@ -59,11 +59,11 @@ export async function generateMetadata({ params }: ProgramPageProps) {
 
     return {
       title: `Insurance Verification - ${program.propertyManagerName}`,
-      description: `Beagle program for ${program.propertyManagerName}. Renters insurance made simple.`,
+      description: `beagle notice for ${program.propertyManagerName}. Renters insurance made simple.`,
     };
   } catch {
     return {
-      title: 'Beagle Program',
+      title: 'Beagle Notice',
     };
   }
 }

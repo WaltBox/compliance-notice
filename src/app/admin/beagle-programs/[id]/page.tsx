@@ -12,7 +12,7 @@ interface EditProgramPageProps {
 }
 
 /**
- * Admin page for editing an existing Beagle program
+ * Admin page for editing an existing beagle notice
  * Route: /admin/beagle-programs/[id]
  */
 export default function EditProgramPage({ params }: EditProgramPageProps) {

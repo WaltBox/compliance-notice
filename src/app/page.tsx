@@ -13,7 +13,7 @@ export default function Home() {
         {/* Hero */}
         <div className="text-center mb-16">
           <h1 className="text-4xl sm:text-5xl font-bold text-beagle-dark mb-4">
-            Beagle Program Manager
+            Beagle Notice Manager
           </h1>
           <p className="text-lg text-gray-600 mb-8">
             Create and manage property management program notices and webviews

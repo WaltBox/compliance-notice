@@ -2,7 +2,7 @@ import React from 'react';
 import SimpleAdminEditor from '@/components/SimpleAdminEditor';
 
 /**
- * Admin page for creating a new Beagle program
+ * Admin page for creating a new beagle notice
  * Route: /admin/beagle-programs/new
  */
 export default function NewProgramPage() {
