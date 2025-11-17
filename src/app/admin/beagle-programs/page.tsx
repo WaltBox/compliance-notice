@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { BeagleProgramData, PaginatedApiResponse } from '@/types';
 
+const PUBLIC_DOMAIN = 'https://www.beaglenotice.com';
+
 /**
  * Admin page for listing all beagle notices
  * Route: /admin/beagle-programs
@@ -147,13 +149,24 @@ export default function AdminProgramsListPage() {
                           <>
                             <span className="text-gray-300 mx-2">•</span>
                             <a
-                              href={`/programs/${program.propertyManagerSlug}`}
+                              href={`${PUBLIC_DOMAIN}/programs/${program.propertyManagerSlug}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-beagle-orange font-semibold hover:underline"
                             >
                               View Public
                             </a>
+                            <span className="text-gray-300 mx-2">•</span>
+                            <button
+                              onClick={() => {
+                                const url = `${PUBLIC_DOMAIN}/programs/${program.propertyManagerSlug}`;
+                                navigator.clipboard.writeText(url);
+                              }}
+                              className="text-beagle-orange font-semibold hover:underline"
+                              title="Copy URL to clipboard"
+                            >
+                              Copy
+                            </button>
                           </>
                         )}
                       </td>
