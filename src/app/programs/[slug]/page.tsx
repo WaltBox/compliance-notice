@@ -1,5 +1,6 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
+import prisma from '@/lib/prisma';
 import BeagleProgramPagePreview from '@/components/BeagleProgramPagePreview';
 import type { BeagleProgramData } from '@/types';
 
@@ -15,38 +16,28 @@ interface ProgramPageProps {
 /**
  * Public tenant-facing program page
  * Route: /programs/[slug]
- * Fetches published program data and renders the Beagle layout
+ * Fetches published program data directly from database
  */
 export default async function ProgramPage({ params }: ProgramPageProps) {
   try {
-    const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-    const host = process.env.VERCEL_URL || 'localhost:3000';
-    const url = `${protocol}://${host}/api/beagle-programs?slug=${params.slug}`;
-    
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      cache: 'no-store',
+    const program = await prisma.beagleProgram.findUnique({
+      where: { propertyManagerSlug: params.slug },
     });
 
-    if (!response.ok) {
-      console.error(`API returned ${response.status}`);
+    if (!program || !program.isPublished) {
       notFound();
     }
 
-    const json = await response.json();
-    const program = json?.data as BeagleProgramData;
+    const data: BeagleProgramData = {
+      ...program,
+      createdAt: program.createdAt.toISOString(),
+      updatedAt: program.updatedAt.toISOString(),
+      selectedProducts: (program.selectedProducts as any) || [],
+    };
 
-    if (!program?.id) {
-      console.error('No program in response');
-      notFound();
-    }
-
-    return <BeagleProgramPagePreview program={program} />;
+    return <BeagleProgramPagePreview program={data} />;
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error loading program:', error);
     notFound();
   }
 }
@@ -56,23 +47,16 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
  */
 export async function generateMetadata({ params }: ProgramPageProps) {
   try {
-    const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-    const host = process.env.VERCEL_URL || 'localhost:3000';
-    
-    const response = await fetch(
-      `${protocol}://${host}/api/beagle-programs?slug=${params.slug}`,
-      { cache: 'no-store' }
-    );
+    const program = await prisma.beagleProgram.findUnique({
+      where: { propertyManagerSlug: params.slug },
+    });
 
-    if (!response.ok) {
+    if (!program?.isPublished) {
       return { title: 'Beagle Notice' };
     }
 
-    const json = await response.json();
-    const program = json?.data as BeagleProgramData;
-
     return {
-      title: `Insurance Verification - ${program?.propertyManagerName || 'Beagle Notice'}`,
+      title: `Insurance Verification - ${program.propertyManagerName}`,
       description: 'Beagle notice. Renters insurance made simple.',
     };
   } catch {
