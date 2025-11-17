@@ -15,7 +15,7 @@ module.exports = {
         },
       },
       fontFamily: {
-        montserrat: ['var(--font-montserrat)', 'sans-serif'],
+        bricolage: ['var(--font-bricolage)', 'sans-serif'],
       },
       spacing: {
         '6xl': '4rem',

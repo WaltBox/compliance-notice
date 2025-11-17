@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
-import { Montserrat } from 'next/font/google';
+import { Bricolage_Grotesque } from 'next/font/google';
 import '@/styles/globals.css';
 
-const montserrat = Montserrat({
+const bricolageGrotesque = Bricolage_Grotesque({
   subsets: ['latin'],
-  variable: '--font-montserrat',
+  variable: '--font-bricolage',
   weight: ['400', '500', '600', '700', '800'],
 });
 
@@ -22,8 +22,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={montserrat.variable}>
-      <body className="font-montserrat bg-white text-beagle-dark">
+    <html lang="en" className={bricolageGrotesque.variable}>
+      <body className="font-bricolage bg-white text-beagle-dark">
         {children}
       </body>
     </html>

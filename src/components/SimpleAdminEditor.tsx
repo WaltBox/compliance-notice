@@ -228,7 +228,7 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
                 updateFormData('propertyManagerSlug', generateSlug(e.target.value));
               }}
               placeholder="e.g., Santa Fe Property Management"
-              className={`w-full px-4 py-2 border rounded-lg font-montserrat ${
+              className={`w-full px-4 py-2 border rounded-lg font-bricolage ${
                 validationErrors.propertyManagerName ? 'border-red-500' : 'border-gray-300'
               }`}
             />
@@ -248,7 +248,7 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
               onChange={(e) => updateFormData('propertyManagerSlug', e.target.value)}
               placeholder="auto-generated"
               disabled={!isNew}
-              className={`w-full px-4 py-2 border rounded-lg font-montserrat ${
+              className={`w-full px-4 py-2 border rounded-lg font-bricolage ${
                 !isNew ? 'bg-gray-100 cursor-not-allowed' : ''
               } ${validationErrors.propertyManagerSlug ? 'border-red-500' : 'border-gray-300'}`}
             />
@@ -272,7 +272,7 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
               value={formData.insuranceVerificationUrl}
               onChange={(e) => updateFormData('insuranceVerificationUrl', e.target.value)}
               placeholder="https://example.com/verify"
-              className={`w-full px-4 py-2 border rounded-lg font-montserrat ${
+              className={`w-full px-4 py-2 border rounded-lg font-bricolage ${
                 validationErrors.insuranceVerificationUrl ? 'border-red-500' : 'border-gray-300'
               }`}
             />
@@ -291,7 +291,7 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
               value={formData.webviewUrl}
               onChange={(e) => updateFormData('webviewUrl', e.target.value)}
               placeholder="https://tools.yourrenterskit.com/renter-benefits/..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg font-montserrat"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg font-bricolage"
             />
             <p className="text-xs text-gray-600 mt-2">
               If provided, this webpage will be embedded as an iframe on the public program page.

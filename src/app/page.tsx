@@ -3,7 +3,7 @@ import BeagleLogo from '@/components/BeagleLogo';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-beagle-light font-montserrat">
+    <div className="min-h-screen bg-beagle-light font-bricolage">
       <div className="max-w-3xl mx-auto px-4 py-16">
         {/* Logo */}
         <div className="mb-12 text-center">

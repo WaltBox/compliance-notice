@@ -49,7 +49,7 @@ export default function EditProgramPage({ params }: EditProgramPageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-beagle-light font-montserrat flex items-center justify-center">
+      <div className="min-h-screen bg-beagle-light font-bricolage flex items-center justify-center">
         <p className="text-beagle-dark">Loading program...</p>
       </div>
     );
@@ -57,7 +57,7 @@ export default function EditProgramPage({ params }: EditProgramPageProps) {
 
   if (error || !program) {
     return (
-      <div className="min-h-screen bg-beagle-light font-montserrat flex items-center justify-center">
+      <div className="min-h-screen bg-beagle-light font-bricolage flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error || 'Program not found'}</p>
           <button
@@ -72,7 +72,7 @@ export default function EditProgramPage({ params }: EditProgramPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-beagle-light font-montserrat">
+    <div className="min-h-screen bg-beagle-light font-bricolage">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 py-4 px-4">
         <div className="max-w-7xl mx-auto">

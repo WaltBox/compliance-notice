@@ -15,7 +15,7 @@ export default function BeagleProgramPagePreview({
   program,
 }: BeagleProgramPagePreviewProps) {
   return (
-    <div className="min-h-screen bg-white font-montserrat">
+    <div className="min-h-screen bg-white font-bricolage">
       {/* Header with logo */}
       <header className="border-b border-gray-200 py-6 px-4">
         <div className="max-w-3xl mx-auto">

@@ -47,7 +47,7 @@ export default function AdminProgramsListPage() {
   const totalPages = Math.ceil(total / pageSize);
 
   return (
-    <div className="min-h-screen bg-beagle-light font-montserrat">
+    <div className="min-h-screen bg-beagle-light font-bricolage">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 py-4 px-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
