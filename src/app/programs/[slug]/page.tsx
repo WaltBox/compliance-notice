@@ -3,6 +3,9 @@ import { notFound } from 'next/navigation';
 import BeagleProgramPagePreview from '@/components/BeagleProgramPagePreview';
 import type { BeagleProgramData } from '@/types';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface ProgramPageProps {
   params: {
     slug: string;
@@ -18,14 +21,18 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   try {
     const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
     const host = process.env.VERCEL_URL || 'localhost:3000';
-    const baseUrl = `${protocol}://${host}`;
+    const url = `${protocol}://${host}/api/beagle-programs?slug=${params.slug}`;
     
-    const response = await fetch(
-      `${baseUrl}/api/beagle-programs?slug=${params.slug}`,
-      { cache: 'no-store' }
-    );
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
 
     if (!response.ok) {
+      console.error(`API returned ${response.status}`);
       notFound();
     }
 
@@ -33,12 +40,13 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     const program = json?.data as BeagleProgramData;
 
     if (!program?.id) {
+      console.error('No program in response');
       notFound();
     }
 
     return <BeagleProgramPagePreview program={program} />;
   } catch (error) {
-    console.error('[programs] Error:', error);
+    console.error('Error:', error);
     notFound();
   }
 }
