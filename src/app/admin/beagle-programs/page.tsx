@@ -59,7 +59,7 @@ export default function AdminProgramsListPage() {
             href="/admin/beagle-programs/new"
             className="bg-beagle-orange text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90"
           >
-            + New Program
+            + New Notice
           </Link>
         </div>
       </header>

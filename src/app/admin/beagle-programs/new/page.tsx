@@ -27,6 +27,6 @@ export default function NewProgramPage() {
 }
 
 export const metadata = {
-  title: 'Create New Program | Beagle Admin',
+  title: 'Create A New Notice | Beagle Admin',
 };
 
