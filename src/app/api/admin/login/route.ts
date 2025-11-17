@@ -4,19 +4,18 @@ export async function POST(request: NextRequest) {
   try {
     const { username, password } = await request.json();
 
-    const adminUsername = process.env.ADMIN_USERNAME;
-    const adminPassword = process.env.ADMIN_PASSWORD;
+    const adminUsername = process.env.ADMIN_USERNAME || '';
+    const adminPassword = process.env.ADMIN_PASSWORD || '';
 
-    // Debug logging
-    console.log('[LOGIN] Checking credentials');
-    console.log('[LOGIN] Env username:', adminUsername ? '✓ set' : '✗ NOT SET');
-    console.log('[LOGIN] Env password:', adminPassword ? '✓ set' : '✗ NOT SET');
-    console.log('[LOGIN] Received username:', username);
-    console.log('[LOGIN] Username match:', username === adminUsername);
+    console.log(`ENV_USER: "${adminUsername}"`);
+    console.log(`ENV_PASS: "${adminPassword}"`);
+    console.log(`INPUT_USER: "${username}"`);
+    console.log(`INPUT_PASS: "${password}"`);
+    console.log(`MATCH: ${username === adminUsername && password === adminPassword}`);
 
     // Check credentials against environment variables
     if (username === adminUsername && password === adminPassword) {
-      console.log('[LOGIN] ✓ Authentication successful');
+      console.log('LOGIN_SUCCESS');
       
       // Create response with success
       const response = NextResponse.json(
