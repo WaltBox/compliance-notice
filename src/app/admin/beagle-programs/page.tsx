@@ -161,14 +161,15 @@ export default function AdminProgramsListPage() {
                             <button
                               onClick={() => {
                                 const url = `${PUBLIC_DOMAIN}/programs/${program.propertyManagerSlug}`;
-                                navigator.clipboard.writeText(url);
+                                const message = `Hi! Your lease requires renters insurance. Follow this link to explore our new partnership with Beagle and meet your lease requirement: ${url}`;
+                                navigator.clipboard.writeText(message);
                                 setCopiedId(program.id);
                                 setTimeout(() => setCopiedId(null), 2000);
                               }}
                               className="text-beagle-orange font-semibold hover:underline"
-                              title="Copy URL to clipboard"
+                              title="Copy notice message to clipboard"
                             >
-                              {copiedId === program.id ? '✓ Copied!' : 'Copy'}
+                              {copiedId === program.id ? '✓ Copied!' : 'Copy Notice'}
                             </button>
                           </>
                         )}
