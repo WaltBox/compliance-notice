@@ -6,9 +6,13 @@ export function middleware(request: NextRequest) {
 
   // If on beaglenotice.com domain - only allow public routes
   if (host.includes('beaglenotice.com')) {
-    // Block admin routes and home page
-    if (pathname.startsWith('/admin') || pathname === '/') {
-      // Return 404 for admin routes
+    // Redirect root to beagleforpms.com
+    if (pathname === '/') {
+      return NextResponse.redirect('https://www.beagleforpms.com', { status: 301 });
+    }
+
+    // Block admin routes
+    if (pathname.startsWith('/admin')) {
       return new NextResponse('Not Found', { status: 404 });
     }
 
