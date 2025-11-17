@@ -1,0 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model BeagleProgram {
+  id                        String   @id @default(cuid())
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  // Property manager details
+  propertyManagerName       String
+  propertyManagerSlug       String   @unique // used in URL, e.g. "santa-fe-property-management"
+
+  // Insurance verification link (required)
+  insuranceVerificationUrl  String
+
+  // Optional embedded webview URL
+  // If provided, displays as iframe on the public program page
+  webviewUrl                String?  // e.g., "https://tools.yourrenterskit.com/renter-benefits/8omnj4cltuawsbsfzz"
+
+  // Program configuration - admin selects which products to offer
+  // selectedProducts: array of product objects with prices like [{ id: "product_100k", name: "...", price: "$15/month" }]
+  selectedProducts          Json     @default("[]") // array of selected products with prices
+
+  // Publication status
+  isPublished               Boolean  @default(false)
+
+  @@index([propertyManagerSlug])
+  @@index([isPublished])
+}
+
