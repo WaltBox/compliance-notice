@@ -11,6 +11,9 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: 'Beagle Program Manager',
   description: 'Admin and public interface for Beagle program notices and webviews',
+  icons: {
+    icon: '/images/logoforbrowser.png',
+  },
 };
 
 export default function RootLayout({

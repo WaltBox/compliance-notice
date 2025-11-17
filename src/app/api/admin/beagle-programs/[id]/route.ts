@@ -75,7 +75,7 @@ export async function PUT(
         ...(body.propertyManagerSlug !== undefined && { propertyManagerSlug: body.propertyManagerSlug }),
         ...(body.insuranceVerificationUrl !== undefined && { insuranceVerificationUrl: body.insuranceVerificationUrl }),
         ...(body.webviewUrl !== undefined && { webviewUrl: body.webviewUrl }),
-        ...(body.selectedProducts !== undefined && { selectedProducts: body.selectedProducts }),
+        ...(body.selectedProducts !== undefined && { selectedProducts: JSON.parse(JSON.stringify(body.selectedProducts)) }),
       },
     });
 

@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
         propertyManagerSlug: slug,
         insuranceVerificationUrl: body.insuranceVerificationUrl,
         webviewUrl: body.webviewUrl || null,
-        selectedProducts: body.selectedProducts || [],
+        selectedProducts: JSON.parse(JSON.stringify(body.selectedProducts || [])),
         isPublished: false,
       },
     });
