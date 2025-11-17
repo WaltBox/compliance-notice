@@ -16,10 +16,12 @@ interface ProgramPageProps {
  */
 export default async function ProgramPage({ params }: ProgramPageProps) {
   try {
-    // Fetch program data from API
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-    const response = await fetch(`${apiUrl}/api/beagle-programs?slug=${params.slug}`, {
+    // Fetch program data from API using relative URL
+    const response = await fetch(`/api/beagle-programs?slug=${params.slug}`, {
       cache: 'no-store', // Ensure fresh data on each request
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
     if (!response.ok) {
@@ -45,8 +47,11 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
  */
 export async function generateMetadata({ params }: ProgramPageProps) {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-    const response = await fetch(`${apiUrl}/api/beagle-programs?slug=${params.slug}`);
+    const response = await fetch(`/api/beagle-programs?slug=${params.slug}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
     if (!response.ok) {
       return {
