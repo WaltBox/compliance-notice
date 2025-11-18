@@ -42,7 +42,7 @@ export default function LoginPage() {
       {/* Huge beagle image - half visible on the right */}
       <div className="absolute -right-1/2 top-1/2 transform -translate-y-1/2 w-full h-full pointer-events-none">
         <img
-          src="/images/big-beagle.png"
+          src="/images/bigbeagle.png"
           alt=""
           className="w-full h-full object-cover"
         />
