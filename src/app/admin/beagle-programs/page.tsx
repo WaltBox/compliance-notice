@@ -161,8 +161,16 @@ export default function AdminProgramsListPage() {
                             <button
                               onClick={() => {
                                 const url = `${PUBLIC_DOMAIN}/programs/${program.propertyManagerSlug}`;
-                                const message = `Hi! Your lease requires renters insurance. Follow this link to explore our new partnership with Beagle and meet your lease requirement: ${url}`;
-                                navigator.clipboard.writeText(message);
+                                const plainText = `Hi! Your lease requires renters insurance. Follow this link to explore our new partnership with Beagle and meet your lease requirement: ${url}`;
+                                const htmlText = `Hi! Your lease requires renters insurance. Follow this link to explore our new partnership with Beagle and meet your lease requirement: <a href="${url}">${url}</a>`;
+                                
+                                // Copy to clipboard with both plain text and HTML formats
+                                const blob = new Blob([htmlText], { type: 'text/html' });
+                                const richTextItem = new ClipboardItem({
+                                  'text/html': blob,
+                                  'text/plain': new Blob([plainText], { type: 'text/plain' }),
+                                });
+                                navigator.clipboard.write([richTextItem]);
                                 setCopiedId(program.id);
                                 setTimeout(() => setCopiedId(null), 2000);
                               }}
