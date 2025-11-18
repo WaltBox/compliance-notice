@@ -40,13 +40,11 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-white font-bricolage flex items-center justify-center px-4 relative overflow-hidden">
       {/* Huge beagle image - half visible on the right */}
-      <div className="absolute -right-1/2 top-1/2 transform -translate-y-1/2 w-full h-full pointer-events-none">
-        <img
-          src="/images/bigbeagle.png"
-          alt=""
-          className="w-full h-full object-cover"
-        />
-      </div>
+      <img
+        src="/images/bigbeagle.png"
+        alt=""
+        className="absolute -right-1/2 top-1/2 transform -translate-y-1/2 w-screen h-screen object-cover pointer-events-none"
+      />
 
       <div className="w-full max-w-md relative z-10">
         <div className="mb-8">
