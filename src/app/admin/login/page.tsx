@@ -38,8 +38,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white font-bricolage flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-white font-bricolage flex items-center justify-center px-4 relative overflow-hidden">
+      {/* Huge beagle image - half visible on the right */}
+      <div className="absolute -right-1/2 top-1/2 transform -translate-y-1/2 w-full h-full pointer-events-none">
+        <img
+          src="/images/big-beagle.png"
+          alt=""
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-beagle-dark text-center mb-2">
             Admin Login
