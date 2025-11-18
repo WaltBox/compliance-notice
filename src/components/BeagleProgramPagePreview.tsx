@@ -109,8 +109,8 @@ export default function BeagleProgramPagePreview({
               Thank you! If you wish to be enrolled under Beagle no further action is needed.
             </p>
             
-            <div className="border border-gray-200 rounded-lg p-3 w-fit mx-auto">
-              <div className="flex items-center gap-3 mb-3">
+            <div className="border border-gray-200 rounded-lg p-3 py-2">
+              <div className="flex items-center gap-3">
                 <h3 className="text-beagle-orange font-bold text-base">Questions?</h3>
                 <img 
                   src="/images/beagledog.png" 
@@ -118,7 +118,7 @@ export default function BeagleProgramPagePreview({
                   className="w-16 h-16 object-contain"
                 />
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col">
                   <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-1">Phone</p>
                   <a href="tel:309-250-4236" className="text-beagle-orange font-semibold text-xs hover:underline leading-tight">
