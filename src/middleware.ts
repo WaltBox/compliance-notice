@@ -16,9 +16,9 @@ export function middleware(request: NextRequest) {
       return new NextResponse('Not Found', { status: 404 });
     }
 
-    // Allow /programs/* and /api/beagle-programs routes
+    // Allow /programs/*, /api/beagle-programs, and /api/opt-out-responses routes
     // (everything else also returns 404)
-    if (!pathname.startsWith('/programs') && !pathname.startsWith('/api/beagle-programs')) {
+    if (!pathname.startsWith('/programs') && !pathname.startsWith('/api/beagle-programs') && !pathname.startsWith('/api/opt-out-responses')) {
       return new NextResponse('Not Found', { status: 404 });
     }
   }
