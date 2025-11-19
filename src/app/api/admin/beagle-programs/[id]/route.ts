@@ -81,6 +81,31 @@ export async function PUT(
       },
     });
 
+    // Update or create form configuration if provided
+    if (body.form) {
+      const existingForm = await prisma.form.findUnique({
+        where: { beagleProgramId: params.id },
+      });
+
+      if (existingForm) {
+        await prisma.form.update({
+          where: { beagleProgramId: params.id },
+          data: {
+            tenantLiabilityWaiverCanOptOut: body.form.tenantLiabilityWaiverCanOptOut || false,
+            rentersKitCanOptOut: body.form.rentersKitCanOptOut || false,
+          },
+        });
+      } else {
+        await prisma.form.create({
+          data: {
+            beagleProgramId: params.id,
+            tenantLiabilityWaiverCanOptOut: body.form.tenantLiabilityWaiverCanOptOut || false,
+            rentersKitCanOptOut: body.form.rentersKitCanOptOut || false,
+          },
+        });
+      }
+    }
+
     const response: ApiResponse<BeagleProgramData> = {
       data: {
         ...updated,

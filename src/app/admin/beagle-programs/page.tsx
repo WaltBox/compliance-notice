@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { BeagleProgramData, PaginatedApiResponse } from '@/types';
 
-const PUBLIC_DOMAIN = 'https://www.beaglenotice.com';
+const PUBLIC_DOMAIN = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:3000' 
+  : 'https://www.beaglenotice.com';
 
 /**
  * Admin page for listing all beagle notices
@@ -145,6 +147,13 @@ export default function AdminProgramsListPage() {
                           className="text-beagle-orange font-semibold hover:underline"
                         >
                           Edit
+                        </button>
+                        <span className="text-gray-300 mx-2">•</span>
+                        <button
+                          onClick={() => router.push(`/admin/beagle-programs/${program.id}/responses`)}
+                          className="text-beagle-orange font-semibold hover:underline"
+                        >
+                          Responses
                         </button>
                         {program.isPublished && (
                           <>

@@ -97,6 +97,17 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Create form with opt-out configuration if provided
+    if (body.form) {
+      await prisma.form.create({
+        data: {
+          beagleProgramId: program.id,
+          tenantLiabilityWaiverCanOptOut: body.form.tenantLiabilityWaiverCanOptOut || false,
+          rentersKitCanOptOut: body.form.rentersKitCanOptOut || false,
+        },
+      });
+    }
+
     const response: ApiResponse<BeagleProgramData> = {
       data: {
         ...program,

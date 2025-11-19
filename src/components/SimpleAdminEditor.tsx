@@ -31,6 +31,13 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
     isPublished: program?.isPublished || false,
   });
 
+  // Form opt-out configuration
+  const [formConfig, setFormConfig] = useState({
+    id: 'preview-form',
+    tenantLiabilityWaiverCanOptOut: false,
+    rentersKitCanOptOut: false,
+  });
+
   const updateFormData = (field: string, value: unknown) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setValidationErrors((prev) => ({ ...prev, [field]: '' }));
@@ -73,7 +80,7 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, form: formConfig }),
       });
 
       if (!response.ok) {
@@ -190,6 +197,10 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
         product.id === productId ? { ...product, price } : product
       ),
     }));
+  };
+
+  const updateFormConfig = (field: string, value: boolean) => {
+    setFormConfig((prev) => ({ ...prev, [field]: value }));
   };
 
   // Generate preview data
@@ -350,6 +361,45 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
             </div>
           </div>
 
+          {/* Form Opt-Out Configuration */}
+          <div className="mb-6 border-t border-gray-200 pt-6">
+            <label className="block text-sm font-semibold text-beagle-dark mb-3">
+              Opt-Out Options
+            </label>
+            <p className="text-xs text-gray-600 mb-4">
+              Which products can tenants opt out of on this form? (Leave unchecked if opt-out is not allowed)
+            </p>
+            <div className="space-y-3">
+              {/* Tenant Liability Waiver */}
+              <label className="flex items-center gap-3 cursor-pointer p-3 border border-gray-200 rounded hover:bg-gray-50">
+                <input
+                  type="checkbox"
+                  checked={formConfig.tenantLiabilityWaiverCanOptOut}
+                  onChange={(e) => updateFormConfig('tenantLiabilityWaiverCanOptOut', e.target.checked)}
+                  className="w-4 h-4"
+                />
+                <div>
+                  <p className="font-semibold text-beagle-dark">Tenant Liability Waiver</p>
+                  <p className="text-xs text-gray-600">Allow tenants to opt out of the liability waiver</p>
+                </div>
+              </label>
+
+              {/* Renters Kit */}
+              <label className="flex items-center gap-3 cursor-pointer p-3 border border-gray-200 rounded hover:bg-gray-50">
+                <input
+                  type="checkbox"
+                  checked={formConfig.rentersKitCanOptOut}
+                  onChange={(e) => updateFormConfig('rentersKitCanOptOut', e.target.checked)}
+                  className="w-4 h-4"
+                />
+                <div>
+                  <p className="font-semibold text-beagle-dark">Renters Kit</p>
+                  <p className="text-xs text-gray-600">Allow tenants to opt out of the renters kit</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
           {/* Action Buttons */}
           <div className="flex gap-3 mt-8 pt-6 border-t border-gray-200">
             <button
@@ -392,7 +442,7 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
         <div className="bg-beagle-light rounded-lg p-4 border border-gray-200">
           <p className="text-sm font-semibold text-beagle-dark mb-4">Live Preview</p>
           <div className="bg-white rounded border border-gray-300 overflow-hidden">
-            <BeagleProgramPagePreview program={previewData} />
+            <BeagleProgramPagePreview program={previewData} form={formConfig as any} />
           </div>
         </div>
       </div>

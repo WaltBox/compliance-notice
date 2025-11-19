@@ -33,7 +33,45 @@ model BeagleProgram {
   // Publication status
   isPublished               Boolean  @default(false)
 
+  // Optional form for opt-out functionality
+  form                      Form?
+
   @@index([propertyManagerSlug])
   @@index([isPublished])
+}
+
+model Form {
+  id                                  String   @id @default(cuid())
+  createdAt                           DateTime @default(now())
+  updatedAt                           DateTime @updatedAt
+
+  beagleProgramId                     String   @unique
+  beagleProgram                       BeagleProgram @relation(fields: [beagleProgramId], references: [id], onDelete: Cascade)
+
+  // Opt-out configuration - admin checks these boxes
+  tenantLiabilityWaiverCanOptOut      Boolean  @default(false)
+  rentersKitCanOptOut                 Boolean  @default(false)
+
+  // Responses from tenants
+  responses                           OptOutResponse[]
+
+  @@index([beagleProgramId])
+}
+
+model OptOutResponse {
+  id                                  String   @id @default(cuid())
+  createdAt                           DateTime @default(now())
+
+  formId                              String
+  form                                Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  firstName                           String
+  lastName                            String
+
+  // Track which products they opted out of
+  optedOutOfTenantLiabilityWaiver     Boolean  @default(false)
+  optedOutOfRentersKit                Boolean  @default(false)
+
+  @@index([formId])
 }
 

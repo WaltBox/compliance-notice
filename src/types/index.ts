@@ -41,6 +41,26 @@ export const AVAILABLE_PRODUCTS: Product[] = [
     name: 'Tenant Liability Waiver - 100k + 20k content',
     description: '100k liability + $20,000 in personal property coverage',
   },
+  {
+    id: 'renters_kit_base',
+    name: 'Renters Kit - Base',
+    description: 'Move-in Concierge, ID Theft Protection, Positive Credit Reporting, AI Tools',
+  },
+  {
+    id: 'renters_kit_base_air_filter',
+    name: 'Renters Kit - Base + Air Filter Delivery',
+    description: 'Move-in Concierge, ID Theft Protection, Positive Credit Reporting, AI Tools, Monthly Air Filter Delivery',
+  },
+  {
+    id: 'renters_kit_base_pest',
+    name: 'Renters Kit - Base + Pest Control',
+    description: 'Move-in Concierge, ID Theft Protection, Positive Credit Reporting, AI Tools, Pest Control Service',
+  },
+  {
+    id: 'renters_kit_base_air_filter_pest',
+    name: 'Renters Kit - Base + Air Filter + Pest Control',
+    description: 'Move-in Concierge, ID Theft Protection, Positive Credit Reporting, AI Tools, Monthly Air Filter Delivery, Pest Control Service',
+  },
 ];
 
 /**
@@ -59,6 +79,14 @@ export interface BeagleProgramData {
 }
 
 /**
+ * Form configuration for opt-out functionality
+ */
+export interface FormConfig {
+  tenantLiabilityWaiverCanOptOut?: boolean;
+  rentersKitCanOptOut?: boolean;
+}
+
+/**
  * Request body for creating a new BeagleProgram
  */
 export interface CreateBeagleProgramRequest {
@@ -67,6 +95,7 @@ export interface CreateBeagleProgramRequest {
   insuranceVerificationUrl: string;
   webviewUrl?: string; // optional embedded webview URL
   selectedProducts?: SelectedProduct[]; // array of selected products with prices
+  form?: FormConfig; // optional form configuration
 }
 
 /**
@@ -78,6 +107,7 @@ export interface UpdateBeagleProgramRequest {
   insuranceVerificationUrl?: string;
   webviewUrl?: string; // optional embedded webview URL
   selectedProducts?: SelectedProduct[]; // array of selected products with prices
+  form?: FormConfig; // optional form configuration
 }
 
 /**

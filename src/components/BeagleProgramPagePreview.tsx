@@ -3,9 +3,17 @@
 import React from 'react';
 import type { BeagleProgramData } from '@/types';
 import BeagleLogo from './BeagleLogo';
+import OptOutForm from './OptOutForm';
+
+interface Form {
+  id: string;
+  tenantLiabilityWaiverCanOptOut: boolean;
+  rentersKitCanOptOut: boolean;
+}
 
 interface BeagleProgramPagePreviewProps {
   program: BeagleProgramData;
+  form?: Form | null;
 }
 
 /**
@@ -13,6 +21,7 @@ interface BeagleProgramPagePreviewProps {
  */
 export default function BeagleProgramPagePreview({
   program,
+  form,
 }: BeagleProgramPagePreviewProps) {
   return (
     <div className="min-h-screen bg-white font-bricolage">
@@ -55,29 +64,83 @@ export default function BeagleProgramPagePreview({
           </section>
 
           {/* Products Section with Header */}
-          {program.selectedProducts && program.selectedProducts.length > 0 && (
-            <section className="mb-12 sm:mb-16">
-              <h2 className="text-xl font-bold text-beagle-orange mb-6">Beagle Program:</h2>
-              <div className="space-y-8 sm:space-y-10">
-                {program.selectedProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className="border-b border-gray-200 pb-6 sm:pb-8"
-                  >
-                    <div className="flex items-start justify-between mb-3 sm:mb-4">
-                      <p className="font-semibold text-beagle-dark">{product.name}</p>
-                      {product.price && (
-                        <p className="text-beagle-orange font-bold whitespace-nowrap ml-4">
-                          {product.price.includes('$') ? product.price : `$${product.price} / month`}
-                        </p>
-                      )}
+          {program.selectedProducts && program.selectedProducts.length > 0 && (() => {
+            // Separate products by type
+            const liabilityProducts = program.selectedProducts.filter(p => p.id.startsWith('product_'));
+            const rentersKitProducts = program.selectedProducts.filter(p => p.id.startsWith('renters_kit_'));
+
+            return (
+              <section className="mb-12 sm:mb-16">
+                <h2 className="text-xl font-bold text-beagle-orange mb-8">Beagle Program:</h2>
+                
+                <div className="space-y-10 sm:space-y-12">
+                  {/* Tenant Liability Waiver Section */}
+                  {liabilityProducts.length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-beagle-dark mb-6">Tenant Liability Waiver</h3>
+                      <div className="space-y-8 sm:space-y-10">
+                        {liabilityProducts.map((product) => (
+                          <div
+                            key={product.id}
+                            className="border-b border-gray-200 pb-6 sm:pb-8"
+                          >
+                            <div className="flex items-start justify-between mb-3 sm:mb-4">
+                              <div className="flex items-center gap-2">
+                                <p className="font-semibold text-beagle-dark">{product.name}</p>
+                                {form?.tenantLiabilityWaiverCanOptOut && (
+                                  <span className="inline-block px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded">
+                                    Optional
+                                  </span>
+                                )}
+                              </div>
+                              {product.price && (
+                                <p className="text-beagle-orange font-bold whitespace-nowrap ml-4">
+                                  {product.price.includes('$') ? product.price : `$${product.price} / month`}
+                                </p>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-600 leading-relaxed">{product.description}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600 leading-relaxed">{product.description}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+                  )}
+
+                  {/* Renters Kit Section */}
+                  {rentersKitProducts.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-beagle-dark mb-6">Renters Kit</h3>
+                        {form?.rentersKitCanOptOut && (
+                          <span className="inline-block px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded mb-6">
+                            Optional
+                          </span>
+                        )}
+                      </div>
+                      <div className="space-y-8 sm:space-y-10">
+                        {rentersKitProducts.map((product) => (
+                          <div
+                            key={product.id}
+                            className="border-b border-gray-200 pb-6 sm:pb-8"
+                          >
+                            <div className="flex items-start justify-between mb-3 sm:mb-4">
+                              <p className="font-semibold text-beagle-dark">Includes:</p>
+                              {product.price && (
+                                <p className="text-beagle-orange font-bold whitespace-nowrap ml-4">
+                                  {product.price.includes('$') ? product.price : `$${product.price} / month`}
+                                </p>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-600 leading-relaxed">{product.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </section>
+            );
+          })()}
 
           {/* Embedded Webview (if provided) */}
           {program.webviewUrl && (
@@ -101,6 +164,21 @@ export default function BeagleProgramPagePreview({
                 Loading embedded content from external source
               </p>
             </div>
+          )}
+
+
+          {/* Optional Products Opt-Out Section */}
+          {form && (form.tenantLiabilityWaiverCanOptOut || form.rentersKitCanOptOut) && (
+            <section className="mb-8 sm:mb-10">
+              <p className="text-gray-600 text-xs leading-relaxed mb-2">
+                If you would like to opt out of the optional Beagle Products:
+              </p>
+              <OptOutForm
+                formId={form.id}
+                canOptOutOfTenantLiabilityWaiver={form.tenantLiabilityWaiverCanOptOut}
+                canOptOutOfRentersKit={form.rentersKitCanOptOut}
+              />
+            </section>
           )}
 
           {/* Footer */}

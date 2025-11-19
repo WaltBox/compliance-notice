@@ -22,6 +22,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   try {
     const program = await prisma.beagleProgram.findUnique({
       where: { propertyManagerSlug: params.slug },
+      include: { form: true },
     });
 
     if (!program || !program.isPublished) {
@@ -35,7 +36,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
       selectedProducts: (program.selectedProducts as any) || [],
     };
 
-    return <BeagleProgramPagePreview program={data} />;
+    return <BeagleProgramPagePreview program={data} form={program.form} />;
   } catch (error) {
     console.error('Error loading program:', error);
     notFound();
