@@ -22,6 +22,7 @@ export default function AdminProgramsListPage() {
   const [pageSize] = useState(10);
   const [total, setTotal] = useState(0);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchPrograms = async () => {
@@ -51,6 +52,12 @@ export default function AdminProgramsListPage() {
 
   const totalPages = Math.ceil(total / pageSize);
 
+  // Filter programs based on search query
+  const filteredPrograms = programs.filter((program) =>
+    program.propertyManagerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    program.propertyManagerSlug.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-beagle-light font-bricolage">
       {/* Header */}
@@ -77,6 +84,22 @@ export default function AdminProgramsListPage() {
           </div>
         )}
 
+        {/* Search Bar */}
+        {!loading && programs.length > 0 && (
+          <div className="mb-6">
+            <input
+              type="text"
+              placeholder="Search by property manager name"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1); // Reset to first page when searching
+              }}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg font-bricolage focus:outline-none focus:border-beagle-orange focus:ring-1 focus:ring-beagle-orange"
+            />
+          </div>
+        )}
+
         {loading ? (
           <div className="text-center py-12">
             <p className="text-beagle-dark">Loading programs...</p>
@@ -91,8 +114,17 @@ export default function AdminProgramsListPage() {
               Create your first program
             </Link>
           </div>
+        ) : filteredPrograms.length === 0 ? (
+          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+            <p className="text-gray-600">No programs found matching "{searchQuery}"</p>
+          </div>
         ) : (
           <div>
+            {/* Results count */}
+            <p className="text-sm text-gray-600 mb-4">
+              Showing {filteredPrograms.length} of {total} program(s)
+            </p>
+
             {/* Table */}
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
               <table className="w-full">
@@ -116,7 +148,7 @@ export default function AdminProgramsListPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {programs.map((program) => (
+                  {filteredPrograms.map((program) => (
                     <tr
                       key={program.id}
                       className="border-b border-gray-200 hover:bg-beagle-light transition-colors"
