@@ -7,6 +7,27 @@ import { generateSlug } from '@/lib/utils';
 import { AVAILABLE_PRODUCTS } from '@/types';
 import BeagleProgramPagePreview from './BeagleProgramPagePreview';
 
+// Thin scrollbar styles
+const scrollbarStyles = `
+  .thin-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .thin-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .thin-scrollbar::-webkit-scrollbar-thumb {
+    background: #FF9500;
+    border-radius: 3px;
+  }
+  .thin-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #E68A00;
+  }
+  .thin-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #FF9500 transparent;
+  }
+`;
+
 interface SimpleAdminEditorProps {
   program?: BeagleProgramData;
   isNew?: boolean;
@@ -212,9 +233,11 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
   } as BeagleProgramData;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 py-8">
-      {/* Left: Form Editor */}
-      <div className="space-y-6">
+    <>
+      <style>{scrollbarStyles}</style>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 py-8 h-screen">
+        {/* Left: Form Editor */}
+        <div className="space-y-6 overflow-y-auto pr-4 thin-scrollbar">
         <div>
           <h2 className="text-2xl font-bold text-beagle-dark mb-4">Program Configuration</h2>
 
@@ -319,42 +342,55 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
               Select which products to include in this program and enter the price for each
             </p>
             <div className="space-y-3">
-              {AVAILABLE_PRODUCTS.map((product) => {
+              {AVAILABLE_PRODUCTS.map((product, index) => {
                 const isSelected = formData.selectedProducts.some((p) => p.id === product.id);
                 const selectedProduct = formData.selectedProducts.find((p) => p.id === product.id);
+                const isRentersKit = product.id.startsWith('renters_kit_');
+                const prevProduct = index > 0 ? AVAILABLE_PRODUCTS[index - 1] : null;
+                const prevIsRentersKit = prevProduct?.id.startsWith('renters_kit_');
+                
+                // Show separator if transitioning from liability to renters kit
+                const showSeparator = !prevIsRentersKit && isRentersKit;
                 
                 return (
-                  <div key={product.id} className="border border-gray-200 rounded p-3">
-                    <label className="flex items-start gap-3 cursor-pointer mb-3">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleProduct(product.id)}
-                        className="mt-1"
-                      />
-                      <div>
-                        <p className="font-semibold text-beagle-dark">{product.name}</p>
-                        <p className="text-sm text-gray-600">{product.description}</p>
-                      </div>
-                    </label>
-                    
-                    {isSelected && (
-                      <div className="ml-6 border-t border-gray-200 pt-3">
-                        <label className="block text-xs font-semibold text-beagle-dark mb-2">
-                          Price for this product *
-                        </label>
-                        <input
-                          type="text"
-                          value={selectedProduct?.price || ''}
-                          onChange={(e) => updateProductPrice(product.id, e.target.value)}
-                          placeholder="e.g., $15/month or $15"
-                          className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                          What does this product cost? (e.g., $15/month or $15)
-                        </p>
+                  <div key={product.id}>
+                    {showSeparator && (
+                      <div className="my-4 border-t border-gray-300 pt-4">
+                        <p className="text-xs font-semibold text-beagle-dark text-center mb-3">Renters Kits</p>
                       </div>
                     )}
+                    <div className="border border-gray-200 rounded p-3">
+                      <label className="flex items-start gap-3 cursor-pointer mb-3">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleProduct(product.id)}
+                          className="mt-1"
+                        />
+                        <div>
+                          <p className="font-semibold text-beagle-dark">{product.name}</p>
+                          <p className="text-sm text-gray-600">{product.description}</p>
+                        </div>
+                      </label>
+                      
+                      {isSelected && (
+                        <div className="ml-6 border-t border-gray-200 pt-3">
+                          <label className="block text-xs font-semibold text-beagle-dark mb-2">
+                            Price for this product *
+                          </label>
+                          <input
+                            type="text"
+                            value={selectedProduct?.price || ''}
+                            onChange={(e) => updateProductPrice(product.id, e.target.value)}
+                            placeholder="e.g., $15/month or $15"
+                            className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            What does this product cost? (e.g., $15/month or $15)
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -438,15 +474,16 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
       </div>
 
       {/* Right: Live Preview */}
-      <div className="lg:sticky lg:top-8 lg:h-fit">
-        <div className="bg-beagle-light rounded-lg p-4 border border-gray-200">
+      <div className="overflow-y-auto pl-4 hidden lg:block thin-scrollbar">
+        <div className="bg-beagle-light rounded-lg p-4 border border-gray-200 sticky top-0">
           <p className="text-sm font-semibold text-beagle-dark mb-4">Live Preview</p>
-          <div className="bg-white rounded border border-gray-300 overflow-hidden">
+          <div className="bg-white rounded border border-gray-300 overflow-hidden max-h-screen">
             <BeagleProgramPagePreview program={previewData} form={formConfig as any} />
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 
