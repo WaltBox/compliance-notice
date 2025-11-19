@@ -475,9 +475,9 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
 
       {/* Right: Live Preview */}
       <div className="overflow-y-auto pl-4 hidden lg:block thin-scrollbar">
-        <div className="bg-beagle-light rounded-lg p-4 border border-gray-200 sticky top-0">
-          <p className="text-sm font-semibold text-beagle-dark mb-4">Live Preview</p>
-          <div className="bg-white rounded border border-gray-300 overflow-hidden max-h-screen">
+        <div className="bg-beagle-light rounded-lg p-4 border border-gray-200">
+          <p className="text-sm font-semibold text-beagle-dark mb-4 sticky top-0 bg-beagle-light">Live Preview</p>
+          <div className="bg-white rounded border border-gray-300 overflow-hidden">
             <BeagleProgramPagePreview program={previewData} form={formConfig as any} />
           </div>
         </div>
