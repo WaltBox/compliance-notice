@@ -8,6 +8,15 @@ export interface Product {
 }
 
 /**
+ * Upgrade option for Tenant Liability products
+ */
+export interface ProductUpgrade {
+  id: 'upgrade_5k' | 'upgrade_10k' | 'upgrade_20k';
+  name: string; // e.g., "Add 5k content coverage"
+  priceAdd: string; // e.g., "+$2"
+}
+
+/**
  * Selected product with admin-entered price
  */
 export interface SelectedProduct {
@@ -15,7 +24,29 @@ export interface SelectedProduct {
   name: string; // e.g., "Tenant Liability Waiver - 100k"
   description: string;
   price: string; // e.g., "$15/month" or "$15"
+  upgradesEnabled?: boolean; // only for product_100k - enables optional upgrades
 }
+
+/**
+ * Available upgrades for Tenant Liability Waiver - 100k
+ */
+export const AVAILABLE_UPGRADES: ProductUpgrade[] = [
+  {
+    id: 'upgrade_5k',
+    name: 'Add $5,000 in personal content coverage',
+    priceAdd: '+$2',
+  },
+  {
+    id: 'upgrade_10k',
+    name: 'Add $10,000 in personal content coverage',
+    priceAdd: '+$4',
+  },
+  {
+    id: 'upgrade_20k',
+    name: 'Add $20,000 in personal content coverage',
+    priceAdd: '+$8',
+  },
+];
 
 /**
  * Fixed available products

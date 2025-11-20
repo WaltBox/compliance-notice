@@ -10,6 +10,8 @@ interface SubmitOptOutRequest {
   lastName: string;
   optedOutOfTenantLiabilityWaiver: boolean;
   optedOutOfRentersKit: boolean;
+  selectedUpgrade?: 'upgrade_5k' | 'upgrade_10k' | 'upgrade_20k' | null;
+  selectedUpgradePrice?: string;
 }
 
 /**
@@ -56,6 +58,8 @@ export async function POST(request: NextRequest) {
         lastName: body.lastName.trim(),
         optedOutOfTenantLiabilityWaiver: body.optedOutOfTenantLiabilityWaiver,
         optedOutOfRentersKit: body.optedOutOfRentersKit,
+        selectedUpgrade: body.selectedUpgrade || null,
+        selectedUpgradePrice: body.selectedUpgradePrice || null,
       },
     });
 

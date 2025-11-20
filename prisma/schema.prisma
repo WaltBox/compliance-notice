@@ -36,6 +36,9 @@ model BeagleProgram {
   // Optional form for opt-out functionality
   form                      Form?
 
+  // Upgrade selections
+  upgradeSelections         UpgradeSelection[]
+
   @@index([propertyManagerSlug])
   @@index([isPublished])
 }
@@ -72,6 +75,27 @@ model OptOutResponse {
   optedOutOfTenantLiabilityWaiver     Boolean  @default(false)
   optedOutOfRentersKit                Boolean  @default(false)
 
+  // Track selected upgrades (optional)
+  selectedUpgrade                     String?  // e.g., "upgrade_5k", "upgrade_10k", "upgrade_20k", or null
+  selectedUpgradePrice                String?  // e.g., "+$2", "+$4", "+$6"
+
   @@index([formId])
+}
+
+model UpgradeSelection {
+  id                                  String   @id @default(cuid())
+  createdAt                           DateTime @default(now())
+
+  beagleProgramId                     String
+  beagleProgram                       BeagleProgram @relation(fields: [beagleProgramId], references: [id], onDelete: Cascade)
+
+  firstName                           String
+  lastName                            String
+
+  // Track selected upgrade
+  selectedUpgrade                     String   // e.g., "upgrade_5k", "upgrade_10k", "upgrade_20k"
+  selectedUpgradePrice                String   // e.g., "+$2", "+$4", "+$6"
+
+  @@index([beagleProgramId])
 }
 

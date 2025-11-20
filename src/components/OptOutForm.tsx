@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
+import { AVAILABLE_UPGRADES } from '@/types';
 
 interface OptOutFormProps {
   formId: string;
   canOptOutOfTenantLiabilityWaiver: boolean;
   canOptOutOfRentersKit: boolean;
+  selectedUpgrade?: 'upgrade_5k' | 'upgrade_10k' | 'upgrade_20k' | null; // Selected upgrade from main page
   onSuccess?: () => void;
 }
 
@@ -16,6 +18,7 @@ export default function OptOutForm({
   formId,
   canOptOutOfTenantLiabilityWaiver,
   canOptOutOfRentersKit,
+  selectedUpgrade,
   onSuccess,
 }: OptOutFormProps) {
   const [isOpen, setIsOpen] = useState(false);

@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { BeagleProgramData, SelectedProduct } from '@/types';
 import { generateSlug } from '@/lib/utils';
-import { AVAILABLE_PRODUCTS } from '@/types';
+import { AVAILABLE_PRODUCTS, AVAILABLE_UPGRADES } from '@/types';
 import BeagleProgramPagePreview from './BeagleProgramPagePreview';
 
 // Thin scrollbar styles
@@ -58,6 +58,30 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
     tenantLiabilityWaiverCanOptOut: false,
     rentersKitCanOptOut: false,
   });
+
+  // Load form config from program data when editing
+  useEffect(() => {
+    if (program?.id && !isNew) {
+      const fetchFormConfig = async () => {
+        try {
+          const response = await fetch(`/api/admin/beagle-programs/${program.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.data?.form) {
+              setFormConfig({
+                id: data.data.form.id,
+                tenantLiabilityWaiverCanOptOut: data.data.form.tenantLiabilityWaiverCanOptOut || false,
+                rentersKitCanOptOut: data.data.form.rentersKitCanOptOut || false,
+              });
+            }
+          }
+        } catch (err) {
+          console.error('Failed to load form config:', err);
+        }
+      };
+      fetchFormConfig();
+    }
+  }, [program?.id, isNew]);
 
   const updateFormData = (field: string, value: unknown) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -156,26 +180,40 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
     setError(null);
 
     try {
-      const response = await fetch(
-        `/api/admin/beagle-programs/${program.id}/publish`,
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      // First, save the form data
+      const saveUrl = `/api/admin/beagle-programs/${program.id}`;
+      const saveResponse = await fetch(saveUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, form: formConfig }),
+      });
 
-      if (!response.ok) {
-        const errorData = await response.json();
+      if (!saveResponse.ok) {
+        const errorData = await saveResponse.json();
+        throw new Error(errorData.error || 'Failed to save program');
+      }
+
+      const savedResult = await saveResponse.json();
+
+      // Then, toggle publish status
+      const publishUrl = `/api/admin/beagle-programs/${program.id}/publish`;
+      const publishResponse = await fetch(publishUrl, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!publishResponse.ok) {
+        const errorData = await publishResponse.json();
         throw new Error(errorData.error || 'Failed to toggle publish status');
       }
 
-      const result = await response.json();
+      const publishResult = await publishResponse.json();
       setFormData((prev) => ({
         ...prev,
-        isPublished: result.data.isPublished,
+        isPublished: publishResult.data.isPublished,
       }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to toggle publish status');
+      setError(err instanceof Error ? err.message : 'Failed to publish');
     } finally {
       setIsSaving(false);
     }
@@ -222,6 +260,17 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
 
   const updateFormConfig = (field: string, value: boolean) => {
     setFormConfig((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const toggleProductUpgrades = (productId: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedProducts: prev.selectedProducts.map((product) =>
+        product.id === productId
+          ? { ...product, upgradesEnabled: !product.upgradesEnabled }
+          : product
+      ),
+    }));
   };
 
   // Generate preview data
@@ -374,20 +423,52 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
                       </label>
                       
                       {isSelected && (
-                        <div className="ml-6 border-t border-gray-200 pt-3">
-                          <label className="block text-xs font-semibold text-beagle-dark mb-2">
-                            Price for this product *
-                          </label>
-                          <input
-                            type="text"
-                            value={selectedProduct?.price || ''}
-                            onChange={(e) => updateProductPrice(product.id, e.target.value)}
-                            placeholder="e.g., $15/month or $15"
-                            className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-                          />
-                          <p className="text-xs text-gray-500 mt-1">
-                            What does this product cost? (e.g., $15/month or $15)
-                          </p>
+                        <div className="ml-6 border-t border-gray-200 pt-3 space-y-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-beagle-dark mb-2">
+                              Price for this product *
+                            </label>
+                            <input
+                              type="text"
+                              value={selectedProduct?.price || ''}
+                              onChange={(e) => updateProductPrice(product.id, e.target.value)}
+                              placeholder="e.g., $15/month or $15"
+                              className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              What does this product cost? (e.g., $15/month or $15)
+                            </p>
+                          </div>
+
+                          {/* Optional Upgrades Button - Only for 100k Liability */}
+                          {product.id === 'product_100k' && (
+                            <div>
+                              <button
+                                type="button"
+                                onClick={() => toggleProductUpgrades(product.id)}
+                                className={`w-full px-3 py-2 rounded text-sm font-semibold transition ${
+                                  selectedProduct?.upgradesEnabled
+                                    ? 'bg-beagle-orange text-white'
+                                    : 'bg-gray-100 text-beagle-dark hover:bg-gray-200'
+                                }`}
+                              >
+                                {selectedProduct?.upgradesEnabled ? '✓ Optional Upgrades Enabled' : 'Enable Optional Upgrades'}
+                              </button>
+                              {selectedProduct?.upgradesEnabled && (
+                                <div className="mt-2 text-xs text-gray-600 bg-orange-50 border border-orange-100 p-3 rounded">
+                                  <p className="font-semibold text-beagle-orange mb-2">Tenants can choose:</p>
+                                  <ul className="space-y-1.5">
+                                    {AVAILABLE_UPGRADES.map((upgrade) => (
+                                      <li key={upgrade.id} className="flex items-center justify-between">
+                                        <span>{upgrade.name}</span>
+                                        <span className="font-semibold text-beagle-orange">{upgrade.priceAdd}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

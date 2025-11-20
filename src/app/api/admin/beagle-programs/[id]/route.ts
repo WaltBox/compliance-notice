@@ -17,6 +17,7 @@ export async function GET(
 
     const program = await prisma.beagleProgram.findUnique({
       where: { id: params.id },
+      include: { form: true },
     });
 
     if (!program) {
@@ -26,13 +27,18 @@ export async function GET(
       );
     }
 
-    const response: ApiResponse<BeagleProgramData> = {
+    const response: ApiResponse<any> = {
       data: {
         ...program,
         createdAt: program.createdAt.toISOString(),
         updatedAt: program.updatedAt.toISOString(),
         selectedProducts: (program.selectedProducts as any) || [],
-      } as BeagleProgramData,
+        form: program.form ? {
+          id: program.form.id,
+          tenantLiabilityWaiverCanOptOut: program.form.tenantLiabilityWaiverCanOptOut,
+          rentersKitCanOptOut: program.form.rentersKitCanOptOut,
+        } : null,
+      },
     };
 
     return NextResponse.json(response);

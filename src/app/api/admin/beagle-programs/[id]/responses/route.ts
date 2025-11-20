@@ -15,7 +15,7 @@ export async function GET(
   try {
     // TODO: Add authentication check here
 
-    // Get the program and its form with responses
+    // Get the program and its form with responses + upgrade selections
     const program = await prisma.beagleProgram.findUnique({
       where: { id: params.id },
       include: {
@@ -25,6 +25,9 @@ export async function GET(
               orderBy: { createdAt: 'desc' },
             },
           },
+        },
+        upgradeSelections: {
+          orderBy: { createdAt: 'desc' },
         },
       },
     });
@@ -55,9 +58,19 @@ export async function GET(
             lastName: r.lastName,
             optedOutOfTenantLiabilityWaiver: r.optedOutOfTenantLiabilityWaiver,
             optedOutOfRentersKit: r.optedOutOfRentersKit,
+            selectedUpgrade: r.selectedUpgrade,
+            selectedUpgradePrice: r.selectedUpgradePrice,
             createdAt: r.createdAt.toISOString(),
           })),
         },
+        upgradeSelections: program.upgradeSelections.map((u) => ({
+          id: u.id,
+          firstName: u.firstName,
+          lastName: u.lastName,
+          selectedUpgrade: u.selectedUpgrade,
+          selectedUpgradePrice: u.selectedUpgradePrice,
+          createdAt: u.createdAt.toISOString(),
+        })),
       },
     };
 
