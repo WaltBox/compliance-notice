@@ -168,21 +168,13 @@ export default function ResponsesPage() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 py-4 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-3">
+          <div className="mb-3">
             <Link
               href="/admin/beagle-programs"
               className="text-beagle-orange hover:underline text-sm font-semibold"
             >
               ← Back to Notices
             </Link>
-            {program?.form?.responses && program.form.responses.length > 0 && (
-              <button
-                onClick={handleExportCSV}
-                className="bg-beagle-orange text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-opacity-90 transition-all"
-              >
-                Export as CSV
-              </button>
-            )}
           </div>
           <h1 className="text-2xl font-bold text-beagle-dark">
             {program ? `Responses - ${program.propertyManagerName}` : 'Responses'}
