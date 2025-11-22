@@ -205,12 +205,19 @@ export default function AdminProgramsListPage() {
                             Edit
                           </button>
                           <span className="text-gray-300">•</span>
-                          <button
-                            onClick={() => router.push(`/admin/beagle-programs/${program.id}/responses`)}
-                            className="text-beagle-orange font-semibold hover:underline text-xs"
-                          >
-                            Responses {program.responseCount !== undefined && program.responseCount > 0 && `(${program.responseCount})`}
-                          </button>
+                          <div className="relative">
+                            <button
+                              onClick={() => router.push(`/admin/beagle-programs/${program.id}/responses`)}
+                              className="text-beagle-orange font-semibold hover:underline text-xs"
+                            >
+                              Responses
+                            </button>
+                            {program.responseCount !== undefined && program.responseCount > 0 && (
+                              <div className="absolute top-full left-1/2 transform -translate-x-1/2 text-xs text-gray-600 whitespace-nowrap -mt-1">
+                                ({program.responseCount})
+                              </div>
+                            )}
+                          </div>
                           {program.isPublished && (
                             <>
                               <span className="text-gray-300">•</span>
