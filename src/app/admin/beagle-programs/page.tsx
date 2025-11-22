@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { BeagleProgramData, PaginatedApiResponse } from '@/types';
@@ -23,14 +23,40 @@ export default function AdminProgramsListPage() {
   const [total, setTotal] = useState(0);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
+  // Debounce search query
+  useEffect(() => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    debounceTimer.current = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1); // Reset to first page when searching
+    }, 500); // Wait 500ms after user stops typing
+
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, [searchQuery]);
+
+  // Fetch programs when page changes (initial load or pagination)
   useEffect(() => {
     const fetchPrograms = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `/api/admin/beagle-programs?page=${page}&pageSize=${pageSize}`
-        );
+        // If we have a search query, include it in the request
+        const queryParams = new URLSearchParams({
+          page: page.toString(),
+          pageSize: pageSize.toString(),
+          ...(debouncedSearch.trim() && { search: debouncedSearch }),
+        });
+
+        const response = await fetch(`/api/admin/beagle-programs?${queryParams}`);
 
         if (!response.ok) {
           throw new Error('Failed to fetch programs');
@@ -48,15 +74,13 @@ export default function AdminProgramsListPage() {
     };
 
     fetchPrograms();
-  }, [page, pageSize]);
+  }, [page, pageSize, debouncedSearch]);
 
   const totalPages = Math.ceil(total / pageSize);
 
-  // Filter programs based on search query
-  const filteredPrograms = programs.filter((program) =>
-    program.propertyManagerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    program.propertyManagerSlug.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Use the fetched programs directly (server-side filtering is handled in the API)
+  // No need for client-side filtering anymore
+  const filteredPrograms = programs;
 
   return (
     <div className="min-h-screen bg-beagle-light font-bricolage">
@@ -89,12 +113,9 @@ export default function AdminProgramsListPage() {
           <div className="mb-6">
             <input
               type="text"
-              placeholder="Search by property manager name"
+              placeholder="Search by property manager name or slug"
               value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1); // Reset to first page when searching
-              }}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg font-bricolage focus:outline-none focus:border-beagle-orange focus:ring-1 focus:ring-beagle-orange"
             />
           </div>
@@ -130,10 +151,10 @@ export default function AdminProgramsListPage() {
               <table className="w-full">
                 <thead className="bg-beagle-light border-b border-gray-200">
                   <tr>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-beagle-dark">
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-beagle-dark w-1/3">
                       Property Manager
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-beagle-dark">
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-beagle-dark w-1/4">
                       Slug
                     </th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-beagle-dark">
@@ -153,11 +174,13 @@ export default function AdminProgramsListPage() {
                       key={program.id}
                       className="border-b border-gray-200 hover:bg-beagle-light transition-colors"
                     >
-                      <td className="px-6 py-3 text-sm text-beagle-dark font-medium">
-                        {program.propertyManagerName}
+                      <td className="px-6 py-3 text-sm text-beagle-dark font-medium truncate" title={program.propertyManagerName}>
+                        {program.propertyManagerName.length > 30 
+                          ? `${program.propertyManagerName.substring(0, 30)}...` 
+                          : program.propertyManagerName}
                       </td>
-                      <td className="px-6 py-3 text-sm text-gray-600">
-                        {program.propertyManagerSlug}
+                      <td className="px-6 py-3 text-sm text-gray-600 truncate" title={program.propertyManagerSlug}>
+                        <span className="text-xs">{program.propertyManagerSlug.length > 20 ? `${program.propertyManagerSlug.substring(0, 20)}...` : program.propertyManagerSlug}</span>
                       </td>
                       <td className="px-6 py-3 text-sm">
                         <span
@@ -173,55 +196,57 @@ export default function AdminProgramsListPage() {
                       <td className="px-6 py-3 text-sm text-gray-600">
                         {new Date(program.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-3 text-sm text-right">
-                        <button
-                          onClick={() => router.push(`/admin/beagle-programs/${program.id}`)}
-                          className="text-beagle-orange font-semibold hover:underline"
-                        >
-                          Edit
-                        </button>
-                        <span className="text-gray-300 mx-2">•</span>
-                        <button
-                          onClick={() => router.push(`/admin/beagle-programs/${program.id}/responses`)}
-                          className="text-beagle-orange font-semibold hover:underline"
-                        >
-                          Responses
-                        </button>
-                        {program.isPublished && (
-                          <>
-                            <span className="text-gray-300 mx-2">•</span>
-                            <a
-                              href={`${PUBLIC_DOMAIN}/programs/${program.propertyManagerSlug}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-beagle-orange font-semibold hover:underline"
-                            >
-                              View Public
-                            </a>
-                            <span className="text-gray-300 mx-2">•</span>
-                            <button
-                              onClick={() => {
-                                const url = `${PUBLIC_DOMAIN}/programs/${program.propertyManagerSlug}`;
-                                const plainText = `Hi! Your lease requires renters insurance. Follow this link to explore our new partnership with Beagle and meet your lease requirement: ${url}`;
-                                const htmlText = `Hi! Your lease requires renters insurance. Follow this link to explore our new partnership with Beagle and meet your lease requirement: <a href="${url}">${url}</a>`;
-                                
-                                // Copy to clipboard with both plain text and HTML formats
-                                const blob = new Blob([htmlText], { type: 'text/html' });
-                                const richTextItem = new ClipboardItem({
-                                  'text/html': blob,
-                                  'text/plain': new Blob([plainText], { type: 'text/plain' }),
-                                });
-                                navigator.clipboard.write([richTextItem]);
-                                setCopiedId(program.id);
-                                setTimeout(() => setCopiedId(null), 2000);
-                              }}
-                              className="text-beagle-orange font-semibold hover:underline"
-                              title="Copy notice message to clipboard"
-                            >
-                              {copiedId === program.id ? '✓ Copied!' : 'Copy Notice'}
-                            </button>
-                          </>
-                        )}
+                      <td className="px-6 py-3 text-sm">
+                        <div className="flex items-center justify-end gap-3 whitespace-nowrap">
+                          <button
+                            onClick={() => router.push(`/admin/beagle-programs/${program.id}`)}
+                            className="text-beagle-orange font-semibold hover:underline text-xs"
+                          >
+                            Edit
+                          </button>
+                          <span className="text-gray-300">•</span>
+                          <button
+                            onClick={() => router.push(`/admin/beagle-programs/${program.id}/responses`)}
+                            className="text-beagle-orange font-semibold hover:underline text-xs"
+                          >
+                            Responses {program.responseCount !== undefined && program.responseCount > 0 && `(${program.responseCount})`}
+                          </button>
+                          {program.isPublished && (
+                            <>
+                              <span className="text-gray-300">•</span>
+                              <a
+                                href={`${PUBLIC_DOMAIN}/programs/${program.propertyManagerSlug}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-beagle-orange font-semibold hover:underline text-xs"
+                              >
+                                View
+                              </a>
+                              <span className="text-gray-300">•</span>
+                              <button
+                                onClick={() => {
+                                  const url = `${PUBLIC_DOMAIN}/programs/${program.propertyManagerSlug}`;
+                                  const plainText = `Hi! Your lease requires renters insurance. Follow this link to explore our new partnership with Beagle and meet your lease requirement: ${url}`;
+                                  const htmlText = `Hi! Your lease requires renters insurance. Follow this link to explore our new partnership with Beagle and meet your lease requirement: <a href="${url}">${url}</a>`;
+                                  
+                                  // Copy to clipboard with both plain text and HTML formats
+                                  const blob = new Blob([htmlText], { type: 'text/html' });
+                                  const richTextItem = new ClipboardItem({
+                                    'text/html': blob,
+                                    'text/plain': new Blob([plainText], { type: 'text/plain' }),
+                                  });
+                                  navigator.clipboard.write([richTextItem]);
+                                  setCopiedId(program.id);
+                                  setTimeout(() => setCopiedId(null), 2000);
+                                }}
+                                className="text-beagle-orange font-semibold hover:underline text-xs"
+                                title="Copy notice message to clipboard"
+                              >
+                                {copiedId === program.id ? '✓ Copied!' : 'Copy'}
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}

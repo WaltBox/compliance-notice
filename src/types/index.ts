@@ -107,6 +107,7 @@ export interface BeagleProgramData {
   webviewUrl?: string; // optional embedded webview URL
   selectedProducts: SelectedProduct[]; // array of selected products with prices
   isPublished: boolean;
+  responseCount?: number; // number of responses (only included in admin list view)
 }
 
 /**

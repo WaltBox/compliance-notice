@@ -21,20 +21,48 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
     const pageSize = Math.min(100, parseInt(searchParams.get('pageSize') || '10'));
+    const search = searchParams.get('search') || '';
 
-    const total = await prisma.beagleProgram.count();
+    // Build filter for search
+    const where = search.trim() 
+      ? {
+          OR: [
+            { propertyManagerName: { contains: search, mode: 'insensitive' as const } },
+            { propertyManagerSlug: { contains: search, mode: 'insensitive' as const } },
+          ],
+        }
+      : {};
+
+    const total = await prisma.beagleProgram.count({ where });
     const programs = await prisma.beagleProgram.findMany({
+      where,
       skip: (page - 1) * pageSize,
       take: pageSize,
       orderBy: { createdAt: 'desc' },
+      include: {
+        form: {
+          include: {
+            responses: true,
+          },
+        },
+        upgradeSelections: true,
+      },
     });
 
-    const formattedPrograms = programs.map(program => ({
-      ...program,
-      createdAt: program.createdAt.toISOString(),
-      updatedAt: program.updatedAt.toISOString(),
-      selectedProducts: (program.selectedProducts as any) || [],
-    })) as BeagleProgramData[];
+    const formattedPrograms = programs.map(program => {
+      // Count total responses (opt-outs + upgrades)
+      const optOutCount = program.form?.responses?.length || 0;
+      const upgradeCount = program.upgradeSelections?.length || 0;
+      const responseCount = optOutCount + upgradeCount;
+
+      return {
+        ...program,
+        createdAt: program.createdAt.toISOString(),
+        updatedAt: program.updatedAt.toISOString(),
+        selectedProducts: (program.selectedProducts as any) || [],
+        responseCount,
+      };
+    }) as BeagleProgramData[];
 
     const response: PaginatedApiResponse<BeagleProgramData> = {
       data: formattedPrograms,
