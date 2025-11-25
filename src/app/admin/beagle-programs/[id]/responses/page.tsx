@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { getAdminToken, clearAdminToken } from '@/lib/auth';
 
 interface OptOutResponse {
   id: string;
@@ -141,7 +142,25 @@ export default function ResponsesPage() {
 
       try {
         setLoading(true);
-        const response = await fetch(`/api/admin/beagle-programs/${programId}/responses`);
+        const token = getAdminToken();
+        
+        if (!token) {
+          clearAdminToken();
+          router.push('/admin/login');
+          return;
+        }
+
+        const response = await fetch(`/api/admin/beagle-programs/${programId}/responses`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.status === 401) {
+          clearAdminToken();
+          router.push('/admin/login');
+          return;
+        }
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -161,7 +180,7 @@ export default function ResponsesPage() {
     };
 
     fetchProgram();
-  }, [programId]);
+  }, [programId, router]);
 
   return (
     <div className="min-h-screen bg-beagle-light font-bricolage">
