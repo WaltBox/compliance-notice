@@ -1,57 +1,63 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
+/**
+ * POST /api/admin/login
+ * Admin login endpoint - authenticate with email/password
+ */
 export async function POST(request: NextRequest) {
   try {
-    const { username, password } = await request.json();
+    const { email, password } = await request.json();
 
-    const adminUsername = process.env.ADMIN_USERNAME || '';
-    const adminPassword = process.env.ADMIN_PASSWORD || '';
-
-    console.log(`ENV_USER: "${adminUsername}"`);
-    console.log(`ENV_PASS: "${adminPassword}"`);
-    console.log(`INPUT_USER: "${username}"`);
-    console.log(`INPUT_PASS: "${password}"`);
-    console.log(`MATCH: ${username === adminUsername && password === adminPassword}`);
-
-    // Check credentials against environment variables
-    if (username === adminUsername && password === adminPassword) {
-      console.log('LOGIN_SUCCESS');
-      
-      // Create response with success
-      const response = NextResponse.json(
-        { success: true, message: 'Login successful' },
-        { status: 200 }
+    // Validate inputs
+    if (!email || !password) {
+      return NextResponse.json(
+        { error: 'Email and password are required' },
+        { status: 400 }
       );
-
-      // Set secure cookie (httpOnly, secure in production)
-      response.cookies.set('admin_session', 'authenticated', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7, // 7 days
-        path: '/',
-      });
-
-      return response;
     }
 
-    console.log('[LOGIN] ✗ Authentication failed - credentials do not match');
-    return NextResponse.json(
-      { success: false, message: 'Invalid credentials' },
-      { status: 401 }
+    // Call Supabase Auth API
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/token?grant_type=password`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      }
     );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('Supabase auth error:', data);
+      return NextResponse.json(
+        { error: 'Invalid email or password' },
+        { status: 401 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      token: data.access_token,
+      refreshToken: data.refresh_token,
+      user: {
+        id: data.user.id,
+        email: data.user.email,
+      },
+    });
   } catch (error) {
-    console.error('[LOGIN] Error:', error);
+    console.error('Login error:', error);
     return NextResponse.json(
-      { success: false, message: 'Login failed' },
+      { error: 'Login failed. Please try again.' },
       { status: 500 }
     );
   }
 }
-
-export async function POST_logout(request: NextRequest) {
-  const response = NextResponse.json({ success: true });
-  response.cookies.delete('admin_session');
-  return response;
-}
-

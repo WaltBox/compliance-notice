@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { getAdminToken, clearAdminToken, isTokenExpired } from '@/lib/auth';
 import type { BeagleProgramData, PaginatedApiResponse } from '@/types';
 
 const PUBLIC_DOMAIN = process.env.NODE_ENV === 'development' 
@@ -24,7 +25,24 @@ export default function AdminProgramsListPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [authenticated, setAuthenticated] = useState(false);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
+  // Check authentication on mount
+  useEffect(() => {
+    const token = getAdminToken();
+    if (!token || isTokenExpired(token)) {
+      clearAdminToken();
+      router.push('/admin/login');
+      return;
+    }
+    setAuthenticated(true);
+  }, [router]);
+
+  const handleLogout = () => {
+    clearAdminToken();
+    router.push('/admin/login');
+  };
 
   // Debounce search query
   useEffect(() => {
@@ -46,9 +64,16 @@ export default function AdminProgramsListPage() {
 
   // Fetch programs when page changes (initial load or pagination)
   useEffect(() => {
+    if (!authenticated) return;
+
     const fetchPrograms = async () => {
       try {
         setLoading(true);
+        const token = getAdminToken();
+        if (!token) {
+          throw new Error('No auth token');
+        }
+
         // If we have a search query, include it in the request
         const queryParams = new URLSearchParams({
           page: page.toString(),
@@ -56,7 +81,17 @@ export default function AdminProgramsListPage() {
           ...(debouncedSearch.trim() && { search: debouncedSearch }),
         });
 
-        const response = await fetch(`/api/admin/beagle-programs?${queryParams}`);
+        const response = await fetch(`/api/admin/beagle-programs?${queryParams}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.status === 401) {
+          clearAdminToken();
+          router.push('/admin/login');
+          return;
+        }
 
         if (!response.ok) {
           throw new Error('Failed to fetch programs');
@@ -74,7 +109,7 @@ export default function AdminProgramsListPage() {
     };
 
     fetchPrograms();
-  }, [page, pageSize, debouncedSearch]);
+  }, [page, pageSize, debouncedSearch, authenticated, router]);
 
   const totalPages = Math.ceil(total / pageSize);
 
@@ -91,12 +126,20 @@ export default function AdminProgramsListPage() {
             <h1 className="text-3xl font-bold text-beagle-dark">Beagle Notices</h1>
             <p className="text-gray-600 mt-1">{total} program(s)</p>
           </div>
-          <Link
-            href="/admin/beagle-programs/new"
-            className="bg-beagle-orange text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90"
-          >
-            + New Notice
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/admin/beagle-programs/new"
+              className="bg-beagle-orange text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90"
+            >
+              + New Notice
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="text-beagle-dark px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </header>
 
@@ -151,7 +194,7 @@ export default function AdminProgramsListPage() {
               <table className="w-full">
                 <thead className="bg-beagle-light border-b border-gray-200">
                   <tr>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-beagle-dark w-1/3">
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-beagle-dark w-2/5">
                       Property Manager
                     </th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-beagle-dark w-1/4">
@@ -174,10 +217,26 @@ export default function AdminProgramsListPage() {
                       key={program.id}
                       className="border-b border-gray-200 hover:bg-beagle-light transition-colors"
                     >
-                      <td className="px-6 py-3 text-sm text-beagle-dark font-medium truncate" title={program.propertyManagerName}>
-                        {program.propertyManagerName.length > 30 
-                          ? `${program.propertyManagerName.substring(0, 30)}...` 
-                          : program.propertyManagerName}
+                      <td className="px-6 py-3 text-sm text-beagle-dark font-medium">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate" title={program.propertyManagerName}>
+                            {program.propertyManagerName.length > 25
+                              ? `${program.propertyManagerName.substring(0, 25)}...`
+                              : program.propertyManagerName}
+                          </span>
+                          {program.tags && program.tags.length > 0 && (
+                            <div className="flex gap-1 flex-shrink-0">
+                              {program.tags.map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="inline-block px-2 py-0.5 bg-blue-500 text-white text-xs font-semibold rounded-full whitespace-nowrap"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-3 text-sm text-gray-600 truncate" title={program.propertyManagerSlug}>
                         <span className="text-xs">{program.propertyManagerSlug.length > 20 ? `${program.propertyManagerSlug.substring(0, 20)}...` : program.propertyManagerSlug}</span>

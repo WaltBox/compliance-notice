@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { rateLimitRedis, getClientIP } from '@/lib/redis-rate-limit';
+import { validateUpgradeSelection, sanitizeText } from '@/lib/validators';
 import type { ApiResponse } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -15,10 +17,34 @@ interface SubmitUpgradeRequest {
 /**
  * POST /api/upgrade-selections
  * Tenant endpoint - submit upgrade selection
+ * Rate limited: 20 requests per 15 minutes per IP (distributed via Redis)
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting (distributed via Redis, falls back to in-memory)
+    const clientIP = getClientIP(request);
+    const isAllowed = await rateLimitRedis(clientIP, {
+      windowMs: 15 * 60 * 1000,
+      maxRequests: 20,
+    });
+
+    if (!isAllowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' } as ApiResponse<null>,
+        { status: 429 }
+      );
+    }
+
     const body: SubmitUpgradeRequest = await request.json();
+
+    // Input validation
+    const validationErrors = validateUpgradeSelection(body);
+    if (validationErrors.length > 0) {
+      return NextResponse.json(
+        { error: 'Validation failed', details: validationErrors } as ApiResponse<null>,
+        { status: 400 }
+      );
+    }
 
     // Validate required fields
     if (!body.beagleProgramId || !body.firstName || !body.lastName || !body.selectedUpgrade) {
@@ -40,12 +66,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create the upgrade selection
+    // Create the upgrade selection (with sanitized input)
     const response = await prisma.upgradeSelection.create({
       data: {
         beagleProgramId: body.beagleProgramId,
-        firstName: body.firstName.trim(),
-        lastName: body.lastName.trim(),
+        firstName: sanitizeText(body.firstName),
+        lastName: sanitizeText(body.lastName),
         selectedUpgrade: body.selectedUpgrade,
         selectedUpgradePrice: body.selectedUpgradePrice,
       },

@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { setAdminToken } from '@/lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,15 +20,16 @@ export default function LoginPage() {
       const response = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
 
-      if (data.success) {
+      if (data.success || data.token) {
+        setAdminToken(data.token);
         router.push('/admin/beagle-programs');
       } else {
-        setError(data.message || 'Login failed');
+        setError(data.error || data.message || 'Login failed');
       }
     } catch (err) {
       setError('An error occurred');
@@ -65,13 +67,13 @@ export default function LoginPage() {
 
           <div>
             <label className="block text-sm font-semibold text-beagle-dark mb-2">
-              Username
+              Email
             </label>
             <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter username"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter email"
               disabled={loading}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-beagle-orange disabled:bg-gray-100"
               required
@@ -105,4 +107,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

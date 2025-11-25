@@ -2,9 +2,10 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { getAdminToken, clearAdminToken } from '@/lib/auth';
 import type { BeagleProgramData, SelectedProduct } from '@/types';
 import { generateSlug } from '@/lib/utils';
-import { AVAILABLE_PRODUCTS, AVAILABLE_UPGRADES } from '@/types';
+import { AVAILABLE_PRODUCTS, AVAILABLE_UPGRADES, AVAILABLE_TAGS } from '@/types';
 import BeagleProgramPagePreview from './BeagleProgramPagePreview';
 
 // Thin scrollbar styles
@@ -54,6 +55,7 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
     noticeIntroText: program?.noticeIntroText || '',
     noticeInsuranceText: program?.noticeInsuranceText || '',
     insuranceNotRequired: program?.insuranceNotRequired || false,
+    tags: program?.tags || ([] as string[]),
   });
 
   // Form opt-out configuration
@@ -68,7 +70,21 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
     if (program?.id && !isNew) {
       const fetchFormConfig = async () => {
         try {
-          const response = await fetch(`/api/admin/beagle-programs/${program.id}`);
+          const token = getAdminToken();
+          if (!token) return;
+
+          const response = await fetch(`/api/admin/beagle-programs/${program.id}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+
+          if (response.status === 401) {
+            clearAdminToken();
+            router.push('/admin/login');
+            return;
+          }
+
           if (response.ok) {
             const data = await response.json();
             if (data.data?.form) {
@@ -85,7 +101,7 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
       };
       fetchFormConfig();
     }
-  }, [program?.id, isNew]);
+  }, [program?.id, isNew, router]);
 
   const updateFormData = (field: string, value: unknown) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -120,6 +136,13 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
     setError(null);
 
     try {
+      const token = getAdminToken();
+      if (!token) {
+        setError('Not authenticated');
+        router.push('/admin/login');
+        return;
+      }
+
       const url = isNew
         ? '/api/admin/beagle-programs'
         : `/api/admin/beagle-programs/${program?.id}`;
@@ -128,9 +151,18 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
 
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({ ...formData, form: formConfig }),
       });
+
+      if (response.status === 401) {
+        clearAdminToken();
+        router.push('/admin/login');
+        return;
+      }
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -184,13 +216,29 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
     setError(null);
 
     try {
+      const token = getAdminToken();
+      if (!token) {
+        setError('Not authenticated');
+        router.push('/admin/login');
+        return;
+      }
+
       // First, save the form data
       const saveUrl = `/api/admin/beagle-programs/${program.id}`;
       const saveResponse = await fetch(saveUrl, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({ ...formData, form: formConfig }),
       });
+
+      if (saveResponse.status === 401) {
+        clearAdminToken();
+        router.push('/admin/login');
+        return;
+      }
 
       if (!saveResponse.ok) {
         const errorData = await saveResponse.json();
@@ -203,7 +251,10 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
       const publishUrl = `/api/admin/beagle-programs/${program.id}/publish`;
       const publishResponse = await fetch(publishUrl, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
       if (!publishResponse.ok) {
@@ -275,6 +326,15 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
           : product
       ),
     }));
+  };
+
+  const toggleTag = (tag: string) => {
+    setFormData((prev) => {
+      const tags = prev.tags.includes(tag)
+        ? prev.tags.filter((t) => t !== tag)
+        : [...prev.tags, tag];
+      return { ...prev, tags };
+    });
   };
 
   // Generate preview data
@@ -560,6 +620,29 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
                   </div>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Program Tags */}
+          <div className="mb-6 border-t border-gray-200 pt-6">
+            <label className="block text-sm font-semibold text-beagle-dark mb-3">
+              Program Tags (Optional)
+            </label>
+            <p className="text-xs text-gray-600 mb-4">
+              Select tags to display on the admin dashboard for quick identification
+            </p>
+            <div className="space-y-2">
+              {AVAILABLE_TAGS.map((tag) => (
+                <label key={tag} className="flex items-center gap-3 cursor-pointer p-3 border border-gray-200 rounded hover:bg-gray-50">
+                  <input
+                    type="checkbox"
+                    checked={formData.tags.includes(tag)}
+                    onChange={() => toggleTag(tag)}
+                    className="w-4 h-4"
+                  />
+                  <span className="font-semibold text-beagle-dark">{tag}</span>
+                </label>
+              ))}
             </div>
           </div>
 

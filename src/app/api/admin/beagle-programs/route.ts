@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { verifyAdminAuth } from '@/lib/auth';
 import { generateSlug, getDefaultPageTitle, getDefaultProgramSubheading } from '@/lib/utils';
 import type { ApiResponse, CreateBeagleProgramRequest, BeagleProgramData, PaginatedApiResponse } from '@/types';
 
@@ -13,10 +14,14 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: NextRequest) {
   try {
-    // TODO: Add authentication check here
-    // if (!await verifyAdminSession(request)) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // }
+    // Verify admin authentication
+    const admin = await verifyAdminAuth(request);
+    if (!admin) {
+      return NextResponse.json(
+        { error: 'Unauthorized' } as ApiResponse<null>,
+        { status: 401 }
+      );
+    }
 
     const { searchParams } = new URL(request.url);
     const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
@@ -88,7 +93,15 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    // TODO: Add authentication check here
+    // Verify admin authentication
+    const admin = await verifyAdminAuth(request);
+    if (!admin) {
+      return NextResponse.json(
+        { error: 'Unauthorized' } as ApiResponse<null>,
+        { status: 401 }
+      );
+    }
+
     const body: CreateBeagleProgramRequest = await request.json();
 
     // Validate required fields
@@ -126,6 +139,7 @@ export async function POST(request: NextRequest) {
         noticeIntroText: body.noticeIntroText || null,
         noticeInsuranceText: body.noticeInsuranceText || null,
         insuranceNotRequired: body.insuranceNotRequired || false,
+        tags: body.tags || [],
       },
     });
 

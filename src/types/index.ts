@@ -112,7 +112,14 @@ export interface BeagleProgramData {
   noticeIntroText?: string; // customizable intro text (optional - defaults to hardcoded)
   noticeInsuranceText?: string; // customizable insurance section text (optional - defaults to hardcoded)
   insuranceNotRequired?: boolean; // if true, hides the insurance section
+  tags?: string[]; // optional tags for dashboard display: "Both", "TLW", "Renters Kit"
 }
+
+/**
+ * Available program tags
+ */
+export const AVAILABLE_TAGS = ['Both', 'TLW', 'Renters Kit'] as const;
+export type ProgramTag = typeof AVAILABLE_TAGS[number];
 
 /**
  * Form configuration for opt-out functionality
@@ -136,6 +143,7 @@ export interface CreateBeagleProgramRequest {
   noticeIntroText?: string; // optional customizable intro text
   noticeInsuranceText?: string; // optional customizable insurance section text
   insuranceNotRequired?: boolean; // if true, hides the insurance section
+  tags?: string[]; // optional tags: "Both", "TLW", "Renters Kit"
 }
 
 /**
@@ -152,6 +160,7 @@ export interface UpdateBeagleProgramRequest {
   noticeIntroText?: string; // optional customizable intro text
   noticeInsuranceText?: string; // optional customizable insurance section text
   insuranceNotRequired?: boolean; // if true, hides the insurance section
+  tags?: string[]; // optional tags: "Both", "TLW", "Renters Kit"
 }
 
 /**

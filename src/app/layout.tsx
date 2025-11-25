@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
 import { Bricolage_Grotesque } from 'next/font/google';
+import { validateEnvironment } from '@/lib/env-validator';
 import '@/styles/globals.css';
+
+// Validate environment on startup
+validateEnvironment();
 
 const bricolageGrotesque = Bricolage_Grotesque({
   subsets: ['latin'],

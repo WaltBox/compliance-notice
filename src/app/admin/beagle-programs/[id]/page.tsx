@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { getAdminToken, clearAdminToken, isTokenExpired } from '@/lib/auth';
 import SimpleAdminEditor from '@/components/SimpleAdminEditor';
 import type { BeagleProgramData } from '@/types';
 
@@ -21,10 +22,34 @@ export default function EditProgramPage({ params }: EditProgramPageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Check authentication on mount
+  useEffect(() => {
+    const token = getAdminToken();
+    if (!token || isTokenExpired(token)) {
+      clearAdminToken();
+      router.push('/admin/login');
+    }
+  }, [router]);
+
   useEffect(() => {
     const fetchProgram = async () => {
       try {
-        const response = await fetch(`/api/admin/beagle-programs/${params.id}`);
+        const token = getAdminToken();
+        if (!token) {
+          throw new Error('Not authenticated');
+        }
+
+        const response = await fetch(`/api/admin/beagle-programs/${params.id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.status === 401) {
+          clearAdminToken();
+          router.push('/admin/login');
+          return;
+        }
 
         if (!response.ok) {
           if (response.status === 404) {

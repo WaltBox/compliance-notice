@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { verifyAdminAuth } from '@/lib/auth';
 import type { ApiResponse, UpdateBeagleProgramRequest, BeagleProgramData } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +14,14 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    // TODO: Add authentication check here
+    // Verify admin authentication
+    const admin = await verifyAdminAuth(request);
+    if (!admin) {
+      return NextResponse.json(
+        { error: 'Unauthorized' } as ApiResponse<null>,
+        { status: 401 }
+      );
+    }
 
     const program = await prisma.beagleProgram.findUnique({
       where: { id: params.id },
@@ -60,7 +68,14 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    // TODO: Add authentication check here
+    // Verify admin authentication
+    const admin = await verifyAdminAuth(request);
+    if (!admin) {
+      return NextResponse.json(
+        { error: 'Unauthorized' } as ApiResponse<null>,
+        { status: 401 }
+      );
+    }
 
     const program = await prisma.beagleProgram.findUnique({
       where: { id: params.id },
@@ -88,6 +103,7 @@ export async function PUT(
         ...(body.noticeIntroText !== undefined && { noticeIntroText: body.noticeIntroText || null }),
         ...(body.noticeInsuranceText !== undefined && { noticeInsuranceText: body.noticeInsuranceText || null }),
         ...(body.insuranceNotRequired !== undefined && { insuranceNotRequired: body.insuranceNotRequired || false }),
+        ...(body.tags !== undefined && { tags: body.tags || [] }),
       },
     });
 

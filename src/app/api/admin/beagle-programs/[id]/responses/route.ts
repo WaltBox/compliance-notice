@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { verifyAdminAuth } from '@/lib/auth';
 import type { ApiResponse } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +14,14 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    // TODO: Add authentication check here
+    // Verify admin authentication
+    const admin = await verifyAdminAuth(request);
+    if (!admin) {
+      return NextResponse.json(
+        { error: 'Unauthorized' } as ApiResponse<null>,
+        { status: 401 }
+      );
+    }
 
     // Get the program and its form with responses + upgrade selections
     const program = await prisma.beagleProgram.findUnique({

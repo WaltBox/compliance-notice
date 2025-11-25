@@ -45,6 +45,9 @@ model BeagleProgram {
   noticeInsuranceText       String?  // "Already have renters insurance?" section text
   insuranceNotRequired      Boolean  @default(false) // If true, hides the insurance section entirely
 
+  // Program tags for dashboard display
+  tags                      String[] @default([]) // e.g., ["Both"], ["TLW"], ["Renters Kit"]
+
   @@index([propertyManagerSlug])
   @@index([isPublished])
 }
