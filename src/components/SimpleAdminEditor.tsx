@@ -425,7 +425,7 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg font-bricolage text-sm"
               />
               <p className="text-xs text-gray-500 mt-1">
-                The main paragraph explaining the program (appears after the title). Use &lt;br&gt; for line breaks.
+                The main paragraph explaining the program (appears after the title). Use &lt;br&gt; for line breaks and &lt;bold&gt;text&lt;/bold&gt; for bold text.
               </p>
             </div>
 
@@ -461,7 +461,7 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg font-bricolage text-sm"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Text for tenants who already have their own renters insurance policy. Use &lt;br&gt; for line breaks.
+                  Text for tenants who already have their own renters insurance policy. Use &lt;br&gt; for line breaks and &lt;bold&gt;text&lt;/bold&gt; for bold text.
                 </p>
               </div>
             )}

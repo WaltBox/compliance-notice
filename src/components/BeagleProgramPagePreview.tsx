@@ -37,9 +37,31 @@ export default function BeagleProgramPagePreview({
   // Check if opt-out is available
   const optOutFormExists = form && (form.tenantLiabilityWaiverCanOptOut || form.rentersKitCanOptOut);
 
+  // Helper function to render text with <bold> and <br> support
+  const renderFormattedText = (text: string) => {
+    return text.split(/(<bold>.*?<\/bold>)/g).map((part, idx) => {
+      if (part.startsWith('<bold>') && part.endsWith('</bold>')) {
+        // Extract text between <bold> tags
+        const boldText = part.replace(/<bold>|<\/bold>/g, '');
+        return (
+          <React.Fragment key={idx}>
+            <span className="font-semibold">{boldText}</span>
+          </React.Fragment>
+        );
+      }
+      // Handle line breaks within non-bold text
+      return part.split('\n').map((line, lineIdx) => (
+        <React.Fragment key={`${idx}-${lineIdx}`}>
+          {line}
+          {lineIdx < part.split('\n').length - 1 && <br />}
+        </React.Fragment>
+      ));
+    });
+  };
+
   // Default notice text (fallback)
   const defaultNoticeTitle = "Insurance Verification";
-  const defaultIntroText = "Your lease requires renters insurance. Let's get you covered.\n\nYou can either upload your own renters insurance policy or be automatically covered through Beagle — a simple, built-in way to meet your lease requirement.";
+  const defaultIntroText = "Your lease requires renters insurance. <bold>Let's get you covered.</bold>\n\nYou can either upload your own renters insurance policy or be automatically covered through Beagle — a simple, built-in way to meet your lease requirement.";
   const defaultInsuranceText = "Already have renters insurance?\n\nSubmit your 3rd party policy to our AI verification system here.";
 
   // Use customized text if available, otherwise use defaults
@@ -147,12 +169,7 @@ export default function BeagleProgramPagePreview({
             <div className="mb-8 sm:mb-10">
               {introText.split('\n\n').map((paragraph, idx) => (
                 <p key={idx} className="text-beagle-dark text-sm leading-relaxed mb-4 sm:mb-5">
-                  {paragraph.split('\n').map((line, lineIdx) => (
-                    <React.Fragment key={lineIdx}>
-                      {line}
-                      {lineIdx < paragraph.split('\n').length - 1 && <br />}
-                    </React.Fragment>
-                  ))}
+                  {renderFormattedText(paragraph)}
                 </p>
               ))}
             </div>
@@ -170,14 +187,14 @@ export default function BeagleProgramPagePreview({
                         <p key={lineIdx} className="text-beagle-dark text-sm mb-2">
                           {line.includes('here') ? (
                             <>
-                              {line.substring(0, line.indexOf('here'))}
+                              {renderFormattedText(line.substring(0, line.indexOf('here')))}
                               <u><a href={program.insuranceVerificationUrl.startsWith('http') ? program.insuranceVerificationUrl : `https://${program.insuranceVerificationUrl}`} target="_blank" rel="noopener noreferrer" className="text-beagle-orange font-semibold hover:underline">here</a></u>
-                              {line.substring(line.indexOf('here') + 4)}
+                              {renderFormattedText(line.substring(line.indexOf('here') + 4))}
                             </>
                           ) : line.startsWith('Already have') ? (
-                            <p className="text-beagle-dark font-semibold mb-3 sm:mb-4">{line}</p>
+                            <p className="text-beagle-dark font-semibold mb-3 sm:mb-4">{renderFormattedText(line)}</p>
                           ) : (
-                            line
+                            renderFormattedText(line)
                           )}
                         </p>
                       ))}
@@ -186,7 +203,7 @@ export default function BeagleProgramPagePreview({
                 }
                 return (
                   <p key={idx} className="text-beagle-dark font-semibold mb-3 sm:mb-4">
-                    {paragraph}
+                    {renderFormattedText(paragraph)}
                   </p>
                 );
               })}
