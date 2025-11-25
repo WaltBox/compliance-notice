@@ -151,3 +151,12 @@ export function getRedisStatus(): {
   };
 }
 
+/**
+ * Get client IP from request
+ */
+export function getClientIP(request: Request): string {
+  const forwarded = request.headers.get('x-forwarded-for');
+  const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
+  return ip;
+}
+
