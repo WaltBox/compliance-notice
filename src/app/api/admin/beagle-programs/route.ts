@@ -47,7 +47,8 @@ export async function GET(request: NextRequest) {
       include: {
         form: {
           include: {
-            responses: true,
+            optOutResponses: true,
+            optInResponses: true,
           },
         },
         upgradeSelections: true,
@@ -55,10 +56,11 @@ export async function GET(request: NextRequest) {
     });
 
     const formattedPrograms = programs.map(program => {
-      // Count total responses (opt-outs + upgrades)
-      const optOutCount = program.form?.responses?.length || 0;
+      // Count total responses (opt-outs + opt-ins + upgrades)
+      const optOutCount = program.form?.optOutResponses?.length || 0;
+      const optInCount = program.form?.optInResponses?.length || 0;
       const upgradeCount = program.upgradeSelections?.length || 0;
-      const responseCount = optOutCount + upgradeCount;
+      const responseCount = optOutCount + optInCount + upgradeCount;
 
       return {
         ...program,
@@ -143,13 +145,17 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Create form with opt-out configuration if provided
+    // Create form with opt-out and opt-in configuration if provided
     if (body.form) {
       await prisma.form.create({
         data: {
           beagleProgramId: program.id,
           tenantLiabilityWaiverCanOptOut: body.form.tenantLiabilityWaiverCanOptOut || false,
           rentersKitCanOptOut: body.form.rentersKitCanOptOut || false,
+          tenantLiabilityWaiverCanOptIn: body.form.tenantLiabilityWaiverCanOptIn || false,
+          rentersKitCanOptIn: body.form.rentersKitCanOptIn || false,
+          optInFormTitle: body.form.optInFormTitle || null,
+          optInFormSubtitle: body.form.optInFormSubtitle || null,
         },
       });
     }

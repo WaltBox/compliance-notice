@@ -9,6 +9,7 @@ interface OptOutResponse {
   id: string;
   firstName: string;
   lastName: string;
+  phoneNumber?: string;
   optedOutOfTenantLiabilityWaiver: boolean;
   optedOutOfRentersKit: boolean;
   selectedUpgrade?: string | null;
@@ -17,10 +18,22 @@ interface OptOutResponse {
   type: 'optout'; // Mark as opt-out type
 }
 
+interface OptInResponse {
+  id: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string;
+  optedInToTenantLiabilityWaiver: boolean;
+  optedInToRentersKit: boolean;
+  createdAt: string;
+  type: 'optin'; // Mark as opt-in type
+}
+
 interface UpgradeSelectionResponse {
   id: string;
   firstName: string;
   lastName: string;
+  phoneNumber?: string;
   selectedUpgrade: string;
   selectedUpgradePrice: string;
   createdAt: string;
@@ -29,7 +42,9 @@ interface UpgradeSelectionResponse {
 
 interface FormData {
   id: string;
-  responses: OptOutResponse[];
+  optOutResponses?: OptOutResponse[];
+  optInResponses?: OptInResponse[];
+  responses?: OptOutResponse[]; // Backwards compatibility
 }
 
 interface ProgramData {
@@ -51,7 +66,7 @@ export default function ResponsesPage() {
   const [program, setProgram] = useState<ProgramData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filterType, setFilterType] = useState<'all' | 'optout' | 'upgrade'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'optout' | 'optin' | 'upgrade'>('all');
 
   // Helper to get upgrade display name
   const getUpgradeDisplayName = (upgradeId: string) => {
@@ -65,20 +80,23 @@ export default function ResponsesPage() {
 
   // Get all responses combined and filtered
   const getAllResponses = () => {
-    const optoutResponses = program?.form?.responses?.map(r => ({ ...r, type: 'optout' as const })) || [];
+    // Try new structure first (optOutResponses, optInResponses), fall back to legacy (responses)
+    const optoutResponses = (program?.form?.optOutResponses || program?.form?.responses || []).map(r => ({ ...r, type: 'optout' as const }));
+    const optinResponses = (program?.form?.optInResponses || []).map(r => ({ ...r, type: 'optin' as const }));
     const upgradeResponses = (program?.upgradeSelections || []).map(u => ({
       ...u,
       type: 'upgrade' as const,
       optedOutOfTenantLiabilityWaiver: false,
       optedOutOfRentersKit: false,
     }));
-    return [...optoutResponses, ...upgradeResponses];
+    return [...optoutResponses, ...optinResponses, ...upgradeResponses];
   };
 
   const getFilteredResponses = () => {
     const allResponses = getAllResponses();
     if (filterType === 'all') return allResponses;
     if (filterType === 'optout') return allResponses.filter(r => r.type === 'optout');
+    if (filterType === 'optin') return allResponses.filter(r => r.type === 'optin');
     if (filterType === 'upgrade') return allResponses.filter(r => r.type === 'upgrade');
     return allResponses;
   };
@@ -87,8 +105,8 @@ export default function ResponsesPage() {
   const allResponses = getAllResponses();
 
   const handleExportCSV = () => {
-    // Create CSV headers
-    const headers = ['First Name', 'Last Name', 'Opted Out - Liability Waiver', 'Selected Upgrade', 'Opted Out - Renters Kit', 'Submitted Date'];
+    // Create CSV headers - expanded for opt-in and phone number
+    const headers = ['First Name', 'Last Name', 'Phone Number', 'Response Type', 'Opted Out - Liability Waiver', 'Opted In - Liability Waiver', 'Selected Upgrade', 'Opted Out - Renters Kit', 'Opted In - Renters Kit', 'Submitted Date'];
     
     // Create CSV rows based on filtered responses
     const rows = filteredResponses.map((response) => {
@@ -97,19 +115,41 @@ export default function ResponsesPage() {
         return [
           `"${optout.firstName}"`,
           `"${optout.lastName}"`,
+          `"${(response as any).phoneNumber || ''}"`,
+          'Opt-out',
           optout.optedOutOfTenantLiabilityWaiver ? 'Yes' : 'No',
+          'N/A',
           optout.selectedUpgrade ? `Upgrade ${getUpgradeDisplayName(optout.selectedUpgrade)}` : 'None',
           optout.optedOutOfRentersKit ? 'Yes' : 'No',
+          'N/A',
           new Date(optout.createdAt).toLocaleString(),
+        ];
+      } else if (response.type === 'optin') {
+        const optin = response as OptInResponse;
+        return [
+          `"${optin.firstName}"`,
+          `"${optin.lastName}"`,
+          `"${(response as any).phoneNumber || ''}"`,
+          'Opt-in',
+          'N/A',
+          optin.optedInToTenantLiabilityWaiver ? 'Yes' : 'No',
+          'None',
+          'N/A',
+          optin.optedInToRentersKit ? 'Yes' : 'No',
+          new Date(optin.createdAt).toLocaleString(),
         ];
       } else {
         const upgrade = response as UpgradeSelectionResponse;
         return [
           `"${upgrade.firstName}"`,
           `"${upgrade.lastName}"`,
+          `"${(response as any).phoneNumber || ''}"`,
+          'Upgrade',
           'No',
+          'N/A',
           `Upgrade ${getUpgradeDisplayName(upgrade.selectedUpgrade)}`,
           'No',
+          'N/A',
           new Date(upgrade.createdAt).toLocaleString(),
         ];
       }
@@ -126,7 +166,7 @@ export default function ResponsesPage() {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     
-    const filterSuffix = filterType === 'all' ? '' : `-${filterType}`;
+    const filterSuffix = filterType === 'all' ? '' : `-${filterType === 'optin' ? 'opt-in' : filterType}`;
     link.setAttribute('href', url);
     link.setAttribute('download', `${program?.propertyManagerName}-responses${filterSuffix}-${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
@@ -170,6 +210,15 @@ export default function ResponsesPage() {
         }
 
         const data = await response.json();
+        console.log('=== DEBUG: Responses Page ===');
+        console.log('API Response:', data);
+        console.log('All Responses:', (() => {
+          const optout = (data.data.form?.optOutResponses || data.data.form?.responses || []).map((r: any) => ({ ...r, type: 'optout' }));
+          const optin = (data.data.form?.optInResponses || []).map((r: any) => ({ ...r, type: 'optin' }));
+          const upgrade = (data.data.upgradeSelections || []).map((u: any) => ({ ...u, type: 'upgrade' }));
+          return [...optout, ...optin, ...upgrade];
+        })());
+        console.log('=== END DEBUG ===');
         setProgram(data.data);
         setError(null);
       } catch (err) {
@@ -215,7 +264,7 @@ export default function ResponsesPage() {
             >
               All ({allResponses.length})
             </button>
-            {program?.form?.responses && program.form.responses.length > 0 && (
+            {(program?.form?.optOutResponses || program?.form?.responses) && (program.form.optOutResponses || program.form.responses || []).length > 0 && (
               <button
                 onClick={() => setFilterType('optout')}
                 className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
@@ -224,7 +273,19 @@ export default function ResponsesPage() {
                     : 'bg-gray-100 text-beagle-dark hover:bg-gray-200'
                 }`}
               >
-                Opt-outs ({program.form.responses.length})
+                Opt-outs ({(program.form.optOutResponses || program.form.responses || []).length})
+              </button>
+            )}
+            {program?.form?.optInResponses && program.form.optInResponses.length > 0 && (
+              <button
+                onClick={() => setFilterType('optin')}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
+                  filterType === 'optin'
+                    ? 'bg-beagle-orange text-white'
+                    : 'bg-gray-100 text-beagle-dark hover:bg-gray-200'
+                }`}
+              >
+                Opt-ins ({program.form.optInResponses.length})
               </button>
             )}
             {program?.upgradeSelections && program.upgradeSelections.length > 0 && (
@@ -271,14 +332,14 @@ export default function ResponsesPage() {
           </div>
         ) : filteredResponses.length === 0 ? (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-            <p className="text-gray-600">No {filterType === 'optout' ? 'opt-out' : filterType === 'upgrade' ? 'upgrade' : ''} responses</p>
+            <p className="text-gray-600">No {filterType === 'optout' ? 'opt-out' : filterType === 'optin' ? 'opt-in' : filterType === 'upgrade' ? 'upgrade' : ''} responses</p>
           </div>
         ) : (
           <div>
             {/* Summary */}
             <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
               <h2 className="text-lg font-bold text-beagle-dark mb-4">Summary</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="bg-beagle-light rounded p-4">
                   <p className="text-sm text-gray-600 mb-1">Total Responses</p>
                   <p className="text-2xl font-bold text-beagle-dark">
@@ -292,15 +353,27 @@ export default function ResponsesPage() {
                   </p>
                 </div>
                 <div className="bg-beagle-light rounded p-4">
-                  <p className="text-sm text-gray-600 mb-1">Selected Upgrades</p>
+                  <p className="text-sm text-gray-600 mb-1">Opted In to Liability Waiver</p>
                   <p className="text-2xl font-bold text-beagle-orange">
-                    {allResponses.filter((r) => r.selectedUpgrade).length}
+                    {allResponses.filter((r) => (r as OptInResponse).optedInToTenantLiabilityWaiver).length}
                   </p>
                 </div>
                 <div className="bg-beagle-light rounded p-4">
                   <p className="text-sm text-gray-600 mb-1">Opted Out of Renters Kit</p>
                   <p className="text-2xl font-bold text-beagle-orange">
                     {allResponses.filter((r) => (r as OptOutResponse).optedOutOfRentersKit).length}
+                  </p>
+                </div>
+                <div className="bg-beagle-light rounded p-4">
+                  <p className="text-sm text-gray-600 mb-1">Opted In to Renters Kit</p>
+                  <p className="text-2xl font-bold text-beagle-orange">
+                    {allResponses.filter((r) => (r as OptInResponse).optedInToRentersKit).length}
+                  </p>
+                </div>
+                <div className="bg-beagle-light rounded p-4">
+                  <p className="text-sm text-gray-600 mb-1">Selected Upgrades</p>
+                  <p className="text-2xl font-bold text-beagle-orange">
+                    {allResponses.filter((r) => r.selectedUpgrade).length}
                   </p>
                 </div>
               </div>
@@ -313,13 +386,13 @@ export default function ResponsesPage() {
                   onClick={handleExportCSV}
                   className="bg-beagle-orange text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-opacity-90 transition-all"
                 >
-                  Export {filterType === 'all' ? 'All' : filterType === 'optout' ? 'Opt-outs' : 'Upgrades'} as CSV
+                  Export {filterType === 'all' ? 'All' : filterType === 'optout' ? 'Opt-outs' : filterType === 'optin' ? 'Opt-ins' : 'Upgrades'} as CSV
                 </button>
               </div>
             )}
 
             {/* Responses Table */}
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-beagle-light border-b border-gray-200">
                   <tr>
@@ -327,13 +400,19 @@ export default function ResponsesPage() {
                       Name
                     </th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-beagle-dark">
+                      Phone
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-beagle-dark">
+                      Type
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-beagle-dark">
                       Liability Waiver
                     </th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-beagle-dark">
-                      Upgrade Selected
+                      Renters Kit
                     </th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-beagle-dark">
-                      Renters Kit
+                      Upgrade Selected
                     </th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-beagle-dark">
                       Submitted
@@ -349,6 +428,20 @@ export default function ResponsesPage() {
                       <td className="px-6 py-3 text-sm text-beagle-dark font-medium">
                         {response.firstName} {response.lastName}
                       </td>
+                      <td className="px-6 py-3 text-sm text-gray-600">
+                        {(response as any).phoneNumber 
+                          ? (response as any).phoneNumber 
+                          : '—'}
+                      </td>
+                      <td className="px-6 py-3 text-sm">
+                        <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
+                          response.type === 'optout' ? 'bg-red-100 text-red-700' :
+                          response.type === 'optin' ? 'bg-green-100 text-green-700' :
+                          'bg-blue-100 text-blue-700'
+                        }`}>
+                          {response.type === 'optout' ? 'Opt-Out' : response.type === 'optin' ? 'Opt-In' : 'Upgrade'}
+                        </span>
+                      </td>
                       <td className="px-6 py-3 text-sm">
                         {response.type === 'optout' ? (
                           <span
@@ -360,14 +453,15 @@ export default function ResponsesPage() {
                           >
                             {(response as OptOutResponse).optedOutOfTenantLiabilityWaiver ? 'Opted Out' : 'No'}
                           </span>
-                        ) : (
-                          <span className="text-gray-500 text-xs">—</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-3 text-sm">
-                        {response.selectedUpgrade ? (
-                          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                            {getUpgradeDisplayName(response.selectedUpgrade)}
+                        ) : response.type === 'optin' ? (
+                          <span
+                            className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                              (response as OptInResponse).optedInToTenantLiabilityWaiver
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-gray-100 text-gray-700'
+                            }`}
+                          >
+                            {(response as OptInResponse).optedInToTenantLiabilityWaiver ? 'Opted In' : 'No'}
                           </span>
                         ) : (
                           <span className="text-gray-500 text-xs">—</span>
@@ -383,6 +477,25 @@ export default function ResponsesPage() {
                             }`}
                           >
                             {(response as OptOutResponse).optedOutOfRentersKit ? 'Opted Out' : 'No'}
+                          </span>
+                        ) : response.type === 'optin' ? (
+                          <span
+                            className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                              (response as OptInResponse).optedInToRentersKit
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-gray-100 text-gray-700'
+                            }`}
+                          >
+                            {(response as OptInResponse).optedInToRentersKit ? 'Opted In' : 'No'}
+                          </span>
+                        ) : (
+                          <span className="text-gray-500 text-xs">—</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-3 text-sm">
+                        {response.selectedUpgrade ? (
+                          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                            {getUpgradeDisplayName(response.selectedUpgrade)}
                           </span>
                         ) : (
                           <span className="text-gray-500 text-xs">—</span>

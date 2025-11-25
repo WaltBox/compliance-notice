@@ -10,6 +10,7 @@ interface SubmitUpgradeRequest {
   beagleProgramId: string;
   firstName: string;
   lastName: string;
+  phoneNumber?: string;
   selectedUpgrade: 'upgrade_5k' | 'upgrade_10k' | 'upgrade_20k';
   selectedUpgradePrice: string;
 }
@@ -72,6 +73,7 @@ export async function POST(request: NextRequest) {
         beagleProgramId: body.beagleProgramId,
         firstName: sanitizeText(body.firstName),
         lastName: sanitizeText(body.lastName),
+        phoneNumber: body.phoneNumber || '(555) 000-0000',
         selectedUpgrade: body.selectedUpgrade,
         selectedUpgradePrice: body.selectedUpgradePrice,
       },

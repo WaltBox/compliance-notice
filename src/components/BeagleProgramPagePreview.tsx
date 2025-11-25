@@ -5,11 +5,14 @@ import type { BeagleProgramData } from '@/types';
 import { AVAILABLE_UPGRADES } from '@/types';
 import BeagleLogo from './BeagleLogo';
 import OptOutForm from './OptOutForm';
+import OptInForm from './OptInForm';
 
 interface Form {
   id: string;
   tenantLiabilityWaiverCanOptOut: boolean;
   rentersKitCanOptOut: boolean;
+  tenantLiabilityWaiverCanOptIn?: boolean;
+  rentersKitCanOptIn?: boolean;
 }
 
 interface BeagleProgramPagePreviewProps {
@@ -36,6 +39,9 @@ export default function BeagleProgramPagePreview({
   
   // Check if opt-out is available
   const optOutFormExists = form && (form.tenantLiabilityWaiverCanOptOut || form.rentersKitCanOptOut);
+  
+  // Check if opt-in is available
+  const optInFormExists = form && (form.tenantLiabilityWaiverCanOptIn || form.rentersKitCanOptIn);
 
   // Helper function to render text with <bold> and <br> support
   const renderFormattedText = (text: string) => {
@@ -122,6 +128,7 @@ export default function BeagleProgramPagePreview({
           beagleProgramId: program.id,
           firstName: upgradeFormData.firstName.trim(),
           lastName: upgradeFormData.lastName.trim(),
+          phoneNumber: '(555) 000-0000',
           selectedUpgrade,
           selectedUpgradePrice: selectedUpgradeObj?.priceAdd,
         }),
@@ -234,7 +241,7 @@ export default function BeagleProgramPagePreview({
                             <div className="flex items-start justify-between mb-3 sm:mb-4">
                               <div className="flex items-center gap-2">
                                 <p className="font-semibold text-beagle-dark">{product.name}</p>
-                                {form?.tenantLiabilityWaiverCanOptOut && (
+                                {(form?.tenantLiabilityWaiverCanOptOut || form?.tenantLiabilityWaiverCanOptIn) && (
                                   <span className="inline-block px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded">
                                     Optional
                                   </span>
@@ -356,7 +363,7 @@ export default function BeagleProgramPagePreview({
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-lg font-semibold text-beagle-dark mb-6">Renters Kit</h3>
-                        {form?.rentersKitCanOptOut && (
+                        {(form?.rentersKitCanOptOut || form?.rentersKitCanOptIn) && (
                           <span className="inline-block px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded mb-6">
                             Optional
                           </span>
@@ -423,6 +430,19 @@ export default function BeagleProgramPagePreview({
                 canOptOutOfTenantLiabilityWaiver={form.tenantLiabilityWaiverCanOptOut}
                 canOptOutOfRentersKit={form.rentersKitCanOptOut}
                 selectedUpgrade={selectedUpgrade}
+              />
+            </section>
+          )}
+
+          {/* Optional Products Opt-In Section */}
+          {form && (form.tenantLiabilityWaiverCanOptIn || form.rentersKitCanOptIn) && (
+            <section className="mb-8 sm:mb-10">
+              <OptInForm
+                formId={form.id}
+                canOptInToTenantLiabilityWaiver={form.tenantLiabilityWaiverCanOptIn || false}
+                canOptInToRentersKit={form.rentersKitCanOptIn || false}
+                optInFormTitle={(form as any).optInFormTitle}
+                optInFormSubtitle={(form as any).optInFormSubtitle}
               />
             </section>
           )}

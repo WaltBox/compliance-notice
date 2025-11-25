@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { rateLimitRedis, getClientIP } from '@/lib/redis-rate-limit';
-import { validateOptOutResponse, sanitizeText } from '@/lib/validators';
+import { validateAndSanitizeOptOutRequest, sanitizeText } from '@/lib/validators';
 import type { ApiResponse } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -10,6 +10,7 @@ interface SubmitOptOutRequest {
   formId: string;
   firstName: string;
   lastName: string;
+  phoneNumber: string;
   optedOutOfTenantLiabilityWaiver: boolean;
   optedOutOfRentersKit: boolean;
   selectedUpgrade?: 'upgrade_5k' | 'upgrade_10k' | 'upgrade_20k' | null;
@@ -39,19 +40,11 @@ export async function POST(request: NextRequest) {
 
     const body: SubmitOptOutRequest = await request.json();
 
-    // Input validation
-    const validationErrors = validateOptOutResponse(body);
-    if (validationErrors.length > 0) {
+    // Input validation and sanitization
+    const validationResult = validateAndSanitizeOptOutRequest(body);
+    if (!validationResult.valid) {
       return NextResponse.json(
-        { error: 'Validation failed', details: validationErrors } as ApiResponse<null>,
-        { status: 400 }
-      );
-    }
-
-    // Validate required fields
-    if (!body.formId || !body.firstName || !body.lastName) {
-      return NextResponse.json(
-        { error: 'Missing required fields: formId, firstName, lastName' } as ApiResponse<null>,
+        { error: validationResult.error || 'Validation failed' } as ApiResponse<null>,
         { status: 400 }
       );
     }
@@ -76,14 +69,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create the opt-out response (with sanitized input)
+    // Create the opt-out response (with sanitized and validated input)
+    const validatedData = validationResult.data!;
     const response = await prisma.optOutResponse.create({
       data: {
-        formId: body.formId,
-        firstName: sanitizeText(body.firstName),
-        lastName: sanitizeText(body.lastName),
-        optedOutOfTenantLiabilityWaiver: body.optedOutOfTenantLiabilityWaiver,
-        optedOutOfRentersKit: body.optedOutOfRentersKit,
+        formId: validatedData.formId,
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName,
+        phoneNumber: validatedData.phoneNumber,
+        optedOutOfTenantLiabilityWaiver: validatedData.optedOutOfTenantLiabilityWaiver,
+        optedOutOfRentersKit: validatedData.optedOutOfRentersKit,
         selectedUpgrade: body.selectedUpgrade || null,
         selectedUpgradePrice: body.selectedUpgradePrice || null,
       },

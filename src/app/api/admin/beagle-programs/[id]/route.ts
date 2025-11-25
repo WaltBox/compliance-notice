@@ -45,6 +45,10 @@ export async function GET(
           id: program.form.id,
           tenantLiabilityWaiverCanOptOut: program.form.tenantLiabilityWaiverCanOptOut,
           rentersKitCanOptOut: program.form.rentersKitCanOptOut,
+          tenantLiabilityWaiverCanOptIn: program.form.tenantLiabilityWaiverCanOptIn,
+          rentersKitCanOptIn: program.form.rentersKitCanOptIn,
+          optInFormTitle: program.form.optInFormTitle,
+          optInFormSubtitle: program.form.optInFormSubtitle,
         } : null,
       },
     };
@@ -119,6 +123,10 @@ export async function PUT(
           data: {
             tenantLiabilityWaiverCanOptOut: body.form.tenantLiabilityWaiverCanOptOut || false,
             rentersKitCanOptOut: body.form.rentersKitCanOptOut || false,
+            tenantLiabilityWaiverCanOptIn: body.form.tenantLiabilityWaiverCanOptIn || false,
+            rentersKitCanOptIn: body.form.rentersKitCanOptIn || false,
+            optInFormTitle: body.form.optInFormTitle || null,
+            optInFormSubtitle: body.form.optInFormSubtitle || null,
           },
         });
       } else {
@@ -127,6 +135,10 @@ export async function PUT(
             beagleProgramId: params.id,
             tenantLiabilityWaiverCanOptOut: body.form.tenantLiabilityWaiverCanOptOut || false,
             rentersKitCanOptOut: body.form.rentersKitCanOptOut || false,
+            tenantLiabilityWaiverCanOptIn: body.form.tenantLiabilityWaiverCanOptIn || false,
+            rentersKitCanOptIn: body.form.rentersKitCanOptIn || false,
+            optInFormTitle: body.form.optInFormTitle || null,
+            optInFormSubtitle: body.form.optInFormSubtitle || null,
           },
         });
       }

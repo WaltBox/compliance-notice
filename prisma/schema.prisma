@@ -64,8 +64,17 @@ model Form {
   tenantLiabilityWaiverCanOptOut      Boolean  @default(false)
   rentersKitCanOptOut                 Boolean  @default(false)
 
+  // Opt-in configuration - admin checks these boxes
+  tenantLiabilityWaiverCanOptIn       Boolean  @default(false)
+  rentersKitCanOptIn                  Boolean  @default(false)
+
+  // Customizable opt-in form text
+  optInFormTitle                      String?  // e.g., "Interested in using Beagle?"
+  optInFormSubtitle                   String?  // e.g., "Tell us which products you'd like to explore..."
+
   // Responses from tenants
-  responses                           OptOutResponse[]
+  optOutResponses                     OptOutResponse[] @relation("OptOutResponses")
+  optInResponses                      OptInResponse[]  @relation("OptInResponses")
 
   @@index([beagleProgramId])
 }
@@ -75,10 +84,11 @@ model OptOutResponse {
   createdAt                           DateTime @default(now())
 
   formId                              String
-  form                                Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  form                                Form     @relation("OptOutResponses", fields: [formId], references: [id], onDelete: Cascade)
 
   firstName                           String
   lastName                            String
+  phoneNumber                         String?  // Contact phone number
 
   // Track which products they opted out of
   optedOutOfTenantLiabilityWaiver     Boolean  @default(false)
@@ -87,6 +97,24 @@ model OptOutResponse {
   // Track selected upgrades (optional)
   selectedUpgrade                     String?  // e.g., "upgrade_5k", "upgrade_10k", "upgrade_20k", or null
   selectedUpgradePrice                String?  // e.g., "+$2", "+$4", "+$6"
+
+  @@index([formId])
+}
+
+model OptInResponse {
+  id                                  String   @id @default(cuid())
+  createdAt                           DateTime @default(now())
+
+  formId                              String
+  form                                Form     @relation("OptInResponses", fields: [formId], references: [id], onDelete: Cascade)
+
+  firstName                           String
+  lastName                            String
+  phoneNumber                         String?  // Contact phone number
+
+  // Track which products they opted in to
+  optedInToTenantLiabilityWaiver      Boolean  @default(false)
+  optedInToRentersKit                 Boolean  @default(false)
 
   @@index([formId])
 }
@@ -100,6 +128,7 @@ model UpgradeSelection {
 
   firstName                           String
   lastName                            String
+  phoneNumber                         String?  // Contact phone number
 
   // Track selected upgrade
   selectedUpgrade                     String   // e.g., "upgrade_5k", "upgrade_10k", "upgrade_20k"

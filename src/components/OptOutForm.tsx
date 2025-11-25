@@ -30,6 +30,7 @@ export default function OptOutForm({
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    phoneNumber: '',
     optedOutOfTenantLiabilityWaiver: false,
     optedOutOfRentersKit: false,
   });
@@ -59,6 +60,11 @@ export default function OptOutForm({
       return;
     }
 
+    if (!formData.phoneNumber.trim()) {
+      setError('Please enter your phone number');
+      return;
+    }
+
     // Check that at least one product is selected for opt-out
     if (!formData.optedOutOfTenantLiabilityWaiver && !formData.optedOutOfRentersKit) {
       setError('Please select at least one product to opt out of');
@@ -75,6 +81,7 @@ export default function OptOutForm({
           formId,
           firstName: formData.firstName.trim(),
           lastName: formData.lastName.trim(),
+          phoneNumber: formData.phoneNumber.trim(),
           optedOutOfTenantLiabilityWaiver: formData.optedOutOfTenantLiabilityWaiver,
           optedOutOfRentersKit: formData.optedOutOfRentersKit,
         }),
@@ -89,6 +96,7 @@ export default function OptOutForm({
       setFormData({
         firstName: '',
         lastName: '',
+        phoneNumber: '',
         optedOutOfTenantLiabilityWaiver: false,
         optedOutOfRentersKit: false,
       });
@@ -202,6 +210,22 @@ export default function OptOutForm({
                     value={formData.lastName}
                     onChange={handleInputChange}
                     placeholder="Enter your last name"
+                    disabled={isSubmitting}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-beagle-orange disabled:opacity-50"
+                  />
+                </div>
+
+                {/* Phone Number */}
+                <div>
+                  <label className="block text-sm font-semibold text-beagle-dark mb-1">
+                    Phone Number *
+                  </label>
+                  <input
+                    type="tel"
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
+                    onChange={handleInputChange}
+                    placeholder="(555) 123-4567"
                     disabled={isSubmitting}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-beagle-orange disabled:opacity-50"
                   />

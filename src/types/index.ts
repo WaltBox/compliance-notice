@@ -122,11 +122,15 @@ export const AVAILABLE_TAGS = ['Both', 'TLW', 'Renters Kit'] as const;
 export type ProgramTag = typeof AVAILABLE_TAGS[number];
 
 /**
- * Form configuration for opt-out functionality
+ * Form configuration for opt-out and opt-in functionality
  */
 export interface FormConfig {
   tenantLiabilityWaiverCanOptOut?: boolean;
   rentersKitCanOptOut?: boolean;
+  tenantLiabilityWaiverCanOptIn?: boolean;
+  rentersKitCanOptIn?: boolean;
+  optInFormTitle?: string;
+  optInFormSubtitle?: string;
 }
 
 /**

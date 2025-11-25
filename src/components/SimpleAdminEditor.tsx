@@ -58,11 +58,13 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
     tags: program?.tags || ([] as string[]),
   });
 
-  // Form opt-out configuration
+  // Form opt-out and opt-in configuration
   const [formConfig, setFormConfig] = useState({
     id: 'preview-form',
     tenantLiabilityWaiverCanOptOut: false,
     rentersKitCanOptOut: false,
+    tenantLiabilityWaiverCanOptIn: false,
+    rentersKitCanOptIn: false,
   });
 
   // Load form config from program data when editing
@@ -92,6 +94,8 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
                 id: data.data.form.id,
                 tenantLiabilityWaiverCanOptOut: data.data.form.tenantLiabilityWaiverCanOptOut || false,
                 rentersKitCanOptOut: data.data.form.rentersKitCanOptOut || false,
+                tenantLiabilityWaiverCanOptIn: data.data.form.tenantLiabilityWaiverCanOptIn || false,
+                rentersKitCanOptIn: data.data.form.rentersKitCanOptIn || false,
               });
             }
           }
@@ -683,6 +687,80 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
                 </div>
               </label>
             </div>
+          </div>
+
+          {/* Opt-In Section */}
+          <div className="mb-6 border-t border-gray-200 pt-6">
+            <label className="block text-sm font-semibold text-beagle-dark mb-3">
+              Opt-In Options
+            </label>
+            <p className="text-xs text-gray-600 mb-4">
+              Which products can tenants opt into? (Leave unchecked if opt-in is not offered)
+            </p>
+
+            {/* Product Options */}
+            <div className="space-y-3 mb-4">
+              {/* Tenant Liability Waiver */}
+              <label className="flex items-center gap-3 cursor-pointer p-3 border border-gray-200 rounded hover:bg-gray-50">
+                <input
+                  type="checkbox"
+                  checked={(formConfig as any).tenantLiabilityWaiverCanOptIn}
+                  onChange={(e) => updateFormConfig('tenantLiabilityWaiverCanOptIn', e.target.checked)}
+                  className="w-4 h-4"
+                />
+                <div>
+                  <p className="font-semibold text-beagle-dark">Tenant Liability Waiver</p>
+                  <p className="text-xs text-gray-600">Allow tenants to opt into the liability waiver</p>
+                </div>
+              </label>
+
+              {/* Renters Kit */}
+              <label className="flex items-center gap-3 cursor-pointer p-3 border border-gray-200 rounded hover:bg-gray-50">
+                <input
+                  type="checkbox"
+                  checked={(formConfig as any).rentersKitCanOptIn}
+                  onChange={(e) => updateFormConfig('rentersKitCanOptIn', e.target.checked)}
+                  className="w-4 h-4"
+                />
+                <div>
+                  <p className="font-semibold text-beagle-dark">Renters Kit</p>
+                  <p className="text-xs text-gray-600">Allow tenants to opt into the renters kit</p>
+                </div>
+              </label>
+            </div>
+
+            {/* Conditional: Show customization only if opt-in is enabled */}
+            {((formConfig as any).tenantLiabilityWaiverCanOptIn || (formConfig as any).rentersKitCanOptIn) && (
+              <div className="bg-beagle-light border-l-4 border-beagle-orange rounded-lg p-4 space-y-3">
+                <p className="text-xs font-semibold text-beagle-dark">Customize Form Text</p>
+                <div>
+                  <label htmlFor="optInFormTitle" className="block text-xs font-semibold text-beagle-dark mb-1.5">
+                    Form Title
+                  </label>
+                  <input
+                    type="text"
+                    id="optInFormTitle"
+                    value={(formConfig as any).optInFormTitle || ''}
+                    onChange={(e) => updateFormConfig('optInFormTitle', e.target.value)}
+                    placeholder="Interested in using Beagle?"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-beagle-orange"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="optInFormSubtitle" className="block text-xs font-semibold text-beagle-dark mb-1.5">
+                    Form Subtitle
+                  </label>
+                  <input
+                    type="text"
+                    id="optInFormSubtitle"
+                    value={(formConfig as any).optInFormSubtitle || ''}
+                    onChange={(e) => updateFormConfig('optInFormSubtitle', e.target.value)}
+                    placeholder="Tell us which products you'd like to use"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-beagle-orange"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}
