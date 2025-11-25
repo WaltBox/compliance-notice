@@ -84,6 +84,10 @@ export async function PUT(
         ...(body.insuranceVerificationUrl !== undefined && { insuranceVerificationUrl: body.insuranceVerificationUrl }),
         ...(body.webviewUrl !== undefined && { webviewUrl: body.webviewUrl }),
         ...(body.selectedProducts !== undefined && { selectedProducts: JSON.parse(JSON.stringify(body.selectedProducts)) }),
+        ...(body.noticeTitle !== undefined && { noticeTitle: body.noticeTitle || null }),
+        ...(body.noticeIntroText !== undefined && { noticeIntroText: body.noticeIntroText || null }),
+        ...(body.noticeInsuranceText !== undefined && { noticeInsuranceText: body.noticeInsuranceText || null }),
+        ...(body.insuranceNotRequired !== undefined && { insuranceNotRequired: body.insuranceNotRequired || false }),
       },
     });
 

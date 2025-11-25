@@ -108,6 +108,10 @@ export interface BeagleProgramData {
   selectedProducts: SelectedProduct[]; // array of selected products with prices
   isPublished: boolean;
   responseCount?: number; // number of responses (only included in admin list view)
+  noticeTitle?: string; // customizable notice title (optional - defaults to hardcoded)
+  noticeIntroText?: string; // customizable intro text (optional - defaults to hardcoded)
+  noticeInsuranceText?: string; // customizable insurance section text (optional - defaults to hardcoded)
+  insuranceNotRequired?: boolean; // if true, hides the insurance section
 }
 
 /**
@@ -128,6 +132,10 @@ export interface CreateBeagleProgramRequest {
   webviewUrl?: string; // optional embedded webview URL
   selectedProducts?: SelectedProduct[]; // array of selected products with prices
   form?: FormConfig; // optional form configuration
+  noticeTitle?: string; // optional customizable notice title
+  noticeIntroText?: string; // optional customizable intro text
+  noticeInsuranceText?: string; // optional customizable insurance section text
+  insuranceNotRequired?: boolean; // if true, hides the insurance section
 }
 
 /**
@@ -140,6 +148,10 @@ export interface UpdateBeagleProgramRequest {
   webviewUrl?: string; // optional embedded webview URL
   selectedProducts?: SelectedProduct[]; // array of selected products with prices
   form?: FormConfig; // optional form configuration
+  noticeTitle?: string; // optional customizable notice title
+  noticeIntroText?: string; // optional customizable intro text
+  noticeInsuranceText?: string; // optional customizable insurance section text
+  insuranceNotRequired?: boolean; // if true, hides the insurance section
 }
 
 /**

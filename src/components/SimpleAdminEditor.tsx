@@ -50,6 +50,10 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
     webviewUrl: program?.webviewUrl || '',
     selectedProducts: program?.selectedProducts || ([] as SelectedProduct[]),
     isPublished: program?.isPublished || false,
+    noticeTitle: program?.noticeTitle || '',
+    noticeIntroText: program?.noticeIntroText || '',
+    noticeInsuranceText: program?.noticeInsuranceText || '',
+    insuranceNotRequired: program?.insuranceNotRequired || false,
   });
 
   // Form opt-out configuration
@@ -380,6 +384,87 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
               If provided, this webpage will be embedded as an iframe on the public program page.
               Example: tools.yourrenterskit.com
             </p>
+          </div>
+
+          {/* Notice Customization Section */}
+          <div className="mb-6 border-t border-gray-200 pt-6">
+            <label className="block text-sm font-semibold text-beagle-dark mb-3">
+              Notice Text Customization (Optional)
+            </label>
+            <p className="text-xs text-gray-600 mb-4">
+              Customize the text that appears on the public notice page. Leave blank to use defaults.
+            </p>
+
+            {/* Notice Title */}
+            <div className="mb-4">
+              <label className="block text-xs font-semibold text-beagle-dark mb-2">
+                Notice Title (Default: "Insurance Verification")
+              </label>
+              <input
+                type="text"
+                value={formData.noticeTitle}
+                onChange={(e) => updateFormData('noticeTitle', e.target.value)}
+                placeholder="e.g., Insurance Verification"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg font-bricolage text-sm"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                The orange title text at the top of the page
+              </p>
+            </div>
+
+            {/* Notice Intro Text */}
+            <div className="mb-4">
+              <label className="block text-xs font-semibold text-beagle-dark mb-2">
+                Intro Text (Default: "Your lease requires renters insurance...")
+              </label>
+              <textarea
+                value={formData.noticeIntroText}
+                onChange={(e) => updateFormData('noticeIntroText', e.target.value)}
+                placeholder="Enter the introduction text that appears at the top of the notice..."
+                rows={4}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg font-bricolage text-sm"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                The main paragraph explaining the program (appears after the title). Use &lt;br&gt; for line breaks.
+              </p>
+            </div>
+
+            {/* Insurance Not Required Checkbox */}
+            <div className="mb-4 p-3 border border-gray-200 rounded bg-gray-50">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.insuranceNotRequired}
+                  onChange={(e) => updateFormData('insuranceNotRequired', e.target.checked)}
+                  className="mt-1"
+                />
+                <div>
+                  <p className="font-semibold text-beagle-dark text-sm">Insurance Not Required</p>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Check this if renters insurance is not required. This will hide the "Already have renters insurance?" section from the public page.
+                  </p>
+                </div>
+              </label>
+            </div>
+
+            {/* Notice Insurance Text (only show if insurance is required) */}
+            {!formData.insuranceNotRequired && (
+              <div className="mb-4">
+                <label className="block text-xs font-semibold text-beagle-dark mb-2">
+                  "Already Have Insurance" Section Text
+                </label>
+                <textarea
+                  value={formData.noticeInsuranceText}
+                  onChange={(e) => updateFormData('noticeInsuranceText', e.target.value)}
+                  placeholder='Enter text for the "Already have renters insurance?" section...'
+                  rows={4}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg font-bricolage text-sm"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Text for tenants who already have their own renters insurance policy. Use &lt;br&gt; for line breaks.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Products Selection */}

@@ -122,6 +122,10 @@ export async function POST(request: NextRequest) {
         webviewUrl: body.webviewUrl || null,
         selectedProducts: JSON.parse(JSON.stringify(body.selectedProducts || [])),
         isPublished: false,
+        noticeTitle: body.noticeTitle || null,
+        noticeIntroText: body.noticeIntroText || null,
+        noticeInsuranceText: body.noticeInsuranceText || null,
+        insuranceNotRequired: body.insuranceNotRequired || false,
       },
     });
 

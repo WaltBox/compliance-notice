@@ -39,6 +39,12 @@ model BeagleProgram {
   // Upgrade selections
   upgradeSelections         UpgradeSelection[]
 
+  // Customizable notice text (all optional - defaults to hardcoded values if null)
+  noticeTitle               String?  // e.g., "Insurance Verification" - defaults to "Insurance Verification - {PM Name}"
+  noticeIntroText           String?  // Main intro paragraph
+  noticeInsuranceText       String?  // "Already have renters insurance?" section text
+  insuranceNotRequired      Boolean  @default(false) // If true, hides the insurance section entirely
+
   @@index([propertyManagerSlug])
   @@index([isPublished])
 }

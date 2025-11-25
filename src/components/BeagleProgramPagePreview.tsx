@@ -37,6 +37,18 @@ export default function BeagleProgramPagePreview({
   // Check if opt-out is available
   const optOutFormExists = form && (form.tenantLiabilityWaiverCanOptOut || form.rentersKitCanOptOut);
 
+  // Default notice text (fallback)
+  const defaultNoticeTitle = "Insurance Verification";
+  const defaultIntroText = "Your lease requires renters insurance. Let's get you covered.\n\nYou can either upload your own renters insurance policy or be automatically covered through Beagle — a simple, built-in way to meet your lease requirement.";
+  const defaultInsuranceText = "Already have renters insurance?\n\nSubmit your 3rd party policy to our AI verification system here.";
+
+  // Use customized text if available, otherwise use defaults
+  const noticeTitle = program.noticeTitle || defaultNoticeTitle;
+  // Convert <br> tags to newlines for processing
+  const introText = (program.noticeIntroText || defaultIntroText).replace(/<br\s*\/?>/gi, '\n');
+  const insuranceText = (program.noticeInsuranceText || defaultInsuranceText).replace(/<br\s*\/?>/gi, '\n');
+  const showInsuranceSection = !program.insuranceNotRequired;
+
   // Helper function to calculate total price
   const calculateTotalPrice = (basePrice: string, upgradeId: string | null) => {
     if (!upgradeId) return basePrice;
@@ -128,29 +140,58 @@ export default function BeagleProgramPagePreview({
           <section className="mb-8 sm:mb-10">
             {/* Page Title: Insurance Verification - PM Name */}
             <h1 className="text-2xl sm:text-3xl font-bold text-beagle-dark mb-6 sm:mb-8">
-              <span className="text-beagle-orange">Insurance Verification</span> - {program.propertyManagerName}
+              <span className="text-beagle-orange">{noticeTitle}</span> - {program.propertyManagerName}
             </h1>
 
             {/* Intro Message */}
             <div className="mb-8 sm:mb-10">
-              <p className="text-beagle-dark text-base leading-relaxed mb-4 sm:mb-5">
-                Your lease requires renters insurance. <span className="font-semibold">Let's get you covered.</span>
-              </p>
-              <p className="text-beagle-dark text-sm leading-relaxed">
-                You can either upload your own renters insurance policy or be automatically covered through Beagle — a simple, built-in way to meet your lease requirement.
-              </p>
+              {introText.split('\n\n').map((paragraph, idx) => (
+                <p key={idx} className="text-beagle-dark text-sm leading-relaxed mb-4 sm:mb-5">
+                  {paragraph.split('\n').map((line, lineIdx) => (
+                    <React.Fragment key={lineIdx}>
+                      {line}
+                      {lineIdx < paragraph.split('\n').length - 1 && <br />}
+                    </React.Fragment>
+                  ))}
+                </p>
+              ))}
             </div>
           </section>
 
           {/* Third Party Insurance CTA */}
-          <section className="mb-8 sm:mb-10">
-            <p className="text-beagle-dark font-semibold mb-3 sm:mb-4">
-              Already have renters insurance?
-            </p>
-            <p className="text-beagle-dark text-sm mb-4 sm:mb-5">
-              Submit your 3rd party policy to our AI verification system <u><a href={program.insuranceVerificationUrl.startsWith('http') ? program.insuranceVerificationUrl : `https://${program.insuranceVerificationUrl}`} target="_blank" rel="noopener noreferrer" className="text-beagle-orange font-semibold hover:underline">here</a></u>.
-            </p>
-          </section>
+          {showInsuranceSection && (
+            <section className="mb-8 sm:mb-10">
+              {insuranceText.split('\n\n').map((paragraph, idx) => {
+                // Check if this paragraph contains a link
+                if (paragraph.toLowerCase().includes('policy') || paragraph.toLowerCase().includes('here')) {
+                  return (
+                    <div key={idx} className="mb-4 sm:mb-5">
+                      {paragraph.split('\n').map((line, lineIdx) => (
+                        <p key={lineIdx} className="text-beagle-dark text-sm mb-2">
+                          {line.includes('here') ? (
+                            <>
+                              {line.substring(0, line.indexOf('here'))}
+                              <u><a href={program.insuranceVerificationUrl.startsWith('http') ? program.insuranceVerificationUrl : `https://${program.insuranceVerificationUrl}`} target="_blank" rel="noopener noreferrer" className="text-beagle-orange font-semibold hover:underline">here</a></u>
+                              {line.substring(line.indexOf('here') + 4)}
+                            </>
+                          ) : line.startsWith('Already have') ? (
+                            <p className="text-beagle-dark font-semibold mb-3 sm:mb-4">{line}</p>
+                          ) : (
+                            line
+                          )}
+                        </p>
+                      ))}
+                    </div>
+                  );
+                }
+                return (
+                  <p key={idx} className="text-beagle-dark font-semibold mb-3 sm:mb-4">
+                    {paragraph}
+                  </p>
+                );
+              })}
+            </section>
+          )}
 
           {/* Products Section with Header */}
           {program.selectedProducts && program.selectedProducts.length > 0 && (() => {
