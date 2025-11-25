@@ -6,8 +6,8 @@ export function middleware(request: NextRequest) {
 
   // If on beaglenotice.com domain - only allow public routes
   if (host.includes('beaglenotice.com')) {
-    // Redirect root to joinbeagle.com
-    if (pathname === '/') {
+    // Redirect root and /lander to joinbeagle.com (GoDaddy forwards non-www domains to /lander)
+    if (pathname === '/' || pathname === '/lander') {
       return NextResponse.redirect('https://joinbeagle.com', { status: 301 });
     }
 
