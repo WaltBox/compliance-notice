@@ -6,9 +6,9 @@ export function middleware(request: NextRequest) {
 
   // If on beaglenotice.com domain - only allow public routes
   if (host.includes('beaglenotice.com')) {
-    // Redirect root to beagleforpms.com
+    // Redirect root to joinbeagle.com
     if (pathname === '/') {
-      return NextResponse.redirect('https://www.beagleforpms.com', { status: 301 });
+      return NextResponse.redirect('https://joinbeagle.com', { status: 301 });
     }
 
     // Block admin routes
