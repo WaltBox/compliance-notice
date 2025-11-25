@@ -4,8 +4,13 @@ export function middleware(request: NextRequest) {
   const host = request.headers.get('host') || '';
   const pathname = request.nextUrl.pathname;
 
-  // If on beaglenotice.com domain - only allow public routes
-  if (host.includes('beaglenotice.com')) {
+  // If on beaglenotice.com (without www), redirect to www version
+  if (host === 'beaglenotice.com') {
+    return NextResponse.redirect(`https://www.beaglenotice.com${pathname}`, { status: 301 });
+  }
+
+  // If on www.beaglenotice.com domain - only allow public routes
+  if (host.includes('www.beaglenotice.com')) {
     // Redirect root and /lander to joinbeagle.com (GoDaddy forwards non-www domains to /lander)
     if (pathname === '/' || pathname === '/lander') {
       return NextResponse.redirect('https://joinbeagle.com', { status: 301 });
