@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { formatPhoneNumber, isValidPhoneNumber } from '@/lib/phone-formatter';
 import { AVAILABLE_UPGRADES } from '@/types';
 
 interface OptOutFormProps {
@@ -44,9 +45,16 @@ export default function OptOutForm({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    let newValue = value;
+    
+    // Format phone number as user types
+    if (name === 'phoneNumber') {
+      newValue = formatPhoneNumber(value);
+    }
+    
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: newValue,
     }));
   };
 
@@ -60,8 +68,8 @@ export default function OptOutForm({
       return;
     }
 
-    if (!formData.phoneNumber.trim()) {
-      setError('Please enter your phone number');
+    if (!isValidPhoneNumber(formData.phoneNumber)) {
+      setError('Please enter a valid 10-digit phone number');
       return;
     }
 
