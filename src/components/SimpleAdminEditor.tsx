@@ -185,9 +185,13 @@ export default function SimpleAdminEditor({ program, isNew = false }: SimpleAdmi
       // If publish is requested
       if (publish && (isNew || !program?.isPublished)) {
         const publishUrl = `/api/admin/beagle-programs/${isNew ? result.data.id : program?.id}/publish`;
+        const token = getAdminToken();
         const publishResponse = await fetch(publishUrl, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
         });
 
         if (!publishResponse.ok) {

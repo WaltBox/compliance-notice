@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { Bricolage_Grotesque } from 'next/font/google';
 import { validateEnvironment } from '@/lib/env-validator';
 import '@/styles/globals.css';
@@ -25,8 +26,25 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const gaId = 'G-PYVYRCWWTQ';
+  
   return (
     <html lang="en" className={bricolageGrotesque.variable}>
+      <head>
+        {/* Google Analytics */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${gaId}');
+          `}
+        </Script>
+      </head>
       <body className="font-bricolage bg-white text-beagle-dark">
         {children}
       </body>
