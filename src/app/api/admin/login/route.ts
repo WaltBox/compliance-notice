@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Call Supabase Auth API
-    const response = await fetch(
+    const supabaseResponse = await fetch(
       `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/token?grant_type=password`,
       {
         method: 'POST',
@@ -34,9 +34,9 @@ export async function POST(request: NextRequest) {
       }
     );
 
-    const data = await response.json();
+    const data = await supabaseResponse.json();
 
-    if (!response.ok) {
+    if (!supabaseResponse.ok) {
       console.error('Supabase auth error:', data);
       return NextResponse.json(
         { error: 'Invalid email or password' },
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       token: data.access_token,
       refreshToken: data.refresh_token,
@@ -53,6 +53,17 @@ export async function POST(request: NextRequest) {
         email: data.user.email,
       },
     });
+
+    // Set admin_session cookie that middleware checks for
+    response.cookies.set('admin_session', data.access_token, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24, // 24 hours
+      path: '/',
+    });
+
+    return response;
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(

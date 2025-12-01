@@ -27,7 +27,7 @@ export default function LoginPage() {
 
       if (data.success || data.token) {
         setAdminToken(data.token);
-        router.push('/admin/beagle-programs');
+        await router.push('/admin/beagle-programs');
       } else {
         setError(data.error || data.message || 'Login failed');
       }
