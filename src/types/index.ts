@@ -20,11 +20,11 @@ export interface ProductUpgrade {
  * Selected product with admin-entered price
  */
 export interface SelectedProduct {
-  id: string; // e.g., "product_100k"
+  id: string; // e.g., "product_100k" or "product_300k"
   name: string; // e.g., "Tenant Liability Waiver - 100k"
   description: string;
   price: string; // e.g., "$15/month" or "$15"
-  upgradesEnabled?: boolean; // only for product_100k - enables optional upgrades
+  upgradesEnabled?: boolean; // only for product_100k and product_300k - enables optional upgrades
 }
 
 /**
@@ -71,6 +71,36 @@ export const AVAILABLE_PRODUCTS: Product[] = [
     id: 'product_100k_20k_content',
     name: 'Tenant Liability Waiver - 100k + 20k content',
     description: '100k liability + $20,000 in personal property coverage',
+  },
+  {
+    id: 'product_300k',
+    name: 'Tenant Liability Waiver - 300k',
+    description: 'Base coverage with 300k in liability',
+  },
+  {
+    id: 'product_300k_5k_content',
+    name: 'Tenant Liability Waiver - 300k + 5k content',
+    description: '300k liability + $5,000 in personal property coverage',
+  },
+  {
+    id: 'product_300k_10k_content',
+    name: 'Tenant Liability Waiver - 300k + 10k content',
+    description: '300k liability + $10,000 in personal property coverage',
+  },
+  {
+    id: 'product_300k_20k_content',
+    name: 'Tenant Liability Waiver - 300k + 20k content',
+    description: '300k liability + $20,000 in personal property coverage',
+  },
+  {
+    id: 'product_300k_30k_content',
+    name: 'Tenant Liability Waiver - 300k + 30k content',
+    description: '300k liability + $30,000 in personal property coverage',
+  },
+  {
+    id: 'product_300k_50k_content',
+    name: 'Tenant Liability Waiver - 300k + 50k content',
+    description: '300k liability + $50,000 in personal property coverage',
   },
   {
     id: 'renters_kit_base',

@@ -137,3 +137,25 @@ model UpgradeSelection {
   @@index([beagleProgramId])
 }
 
+model SmsCampaignLog {
+  id                                  String   @id @default(cuid())
+  createdAt                           DateTime @default(now())
+
+  // Admin user who initiated the campaign
+  adminEmail                          String
+
+  // Campaign metadata
+  totalRecipients                     Int      // Total number of recipients attempted
+  successfulSends                     Int      @default(0) // Number of successful sends
+  failedSends                         Int      @default(0) // Number of failed sends
+
+  // Message content (optional, for audit trail)
+  messagePreview                      String?  // First 100 chars of the message
+  
+  // Campaign status
+  status                              String   // "pending", "in_progress", "completed", "failed"
+
+  @@index([adminEmail])
+  @@index([createdAt])
+}
+

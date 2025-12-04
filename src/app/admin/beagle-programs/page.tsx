@@ -120,26 +120,43 @@ export default function AdminProgramsListPage() {
   return (
     <div className="min-h-screen bg-beagle-light font-bricolage">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 py-4 px-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-beagle-dark">Beagle Notices</h1>
-            <p className="text-gray-600 mt-1">{total} program(s)</p>
+      <header className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between py-4 border-b border-gray-200">
+            <div>
+              <h1 className="text-3xl font-bold text-beagle-dark">Admin Dashboard</h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/admin/beagle-programs/new"
+                className="bg-beagle-orange text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90"
+              >
+                + New Notice
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="text-beagle-dark px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition"
+              >
+                Logout
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
+          
+          {/* Navigation Tabs */}
+          <nav className="flex gap-8">
             <Link
-              href="/admin/beagle-programs/new"
-              className="bg-beagle-orange text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90"
+              href="/admin/beagle-programs"
+              className="py-4 px-2 border-b-2 border-beagle-orange text-beagle-orange font-semibold"
             >
-              + New Notice
+              Notices
             </Link>
-            <button
-              onClick={handleLogout}
-              className="text-beagle-dark px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition"
+            <Link
+              href="/admin/notice-sender"
+              className="py-4 px-2 border-b-2 border-transparent text-gray-600 font-semibold hover:text-beagle-dark hover:border-gray-300 transition"
             >
-              Logout
-            </button>
-          </div>
+              Notice Sender
+            </Link>
+          </nav>
         </div>
       </header>
 
