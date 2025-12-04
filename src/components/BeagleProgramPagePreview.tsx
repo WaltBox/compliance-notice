@@ -135,23 +135,15 @@ export default function BeagleProgramPagePreview({
       });
 
       if (!response.ok) {
-        let errorMessage = 'Failed to submit upgrade selection';
-        
-        // Handle specific HTTP status codes with friendly messages
-        if (response.status === 404) {
-          errorMessage = 'This program is no longer available. Please refresh the page.';
-        } else if (response.status === 429) {
-          errorMessage = 'Too many requests. Please wait a moment and try again.';
-        } else if (response.status === 500) {
-          errorMessage = 'Something went wrong. Please try again in a moment.';
-        } else {
-          try {
-            const errorData = await response.json();
-            errorMessage = errorData.error || errorMessage;
-          } catch {
-            // If response is not JSON, use generic message
-            errorMessage = 'Something went wrong. Please try again.';
+        let errorMessage = 'Something went wrong try again later';
+        try {
+          const errorData = await response.json();
+          // Use API error if available, but fallback to generic message
+          if (errorData.error && typeof errorData.error === 'string') {
+            errorMessage = errorData.error;
           }
+        } catch {
+          // If response is not JSON, keep generic message
         }
         throw new Error(errorMessage);
       }
