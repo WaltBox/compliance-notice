@@ -26,14 +26,17 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
     const pageSize = Math.min(100, parseInt(searchParams.get('pageSize') || '10'));
-    const search = searchParams.get('search') || '';
+    const search = searchParams.get('search')?.trim() || '';
 
-    // Build filter for search
-    const where = search.trim() 
+    // Build filter for search - improved to search multiple fields
+    const where = search
       ? {
           OR: [
             { propertyManagerName: { contains: search, mode: 'insensitive' as const } },
             { propertyManagerSlug: { contains: search, mode: 'insensitive' as const } },
+            { insuranceVerificationUrl: { contains: search, mode: 'insensitive' as const } },
+            // Search for tags (tags is a string array in JSON)
+            { tags: { hasSome: [search] } },
           ],
         }
       : {};

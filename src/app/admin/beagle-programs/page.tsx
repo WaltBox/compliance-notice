@@ -20,7 +20,7 @@ export default function AdminProgramsListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize] = useState(25);
   const [total, setTotal] = useState(0);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -169,17 +169,41 @@ export default function AdminProgramsListPage() {
         )}
 
         {/* Search Bar */}
-        {!loading && programs.length > 0 && (
-          <div className="mb-6">
+        <div className="mb-6">
+          <div className="relative">
             <input
               type="text"
-              placeholder="Search by property manager name or slug"
+              placeholder="Search by name, slug, URL, or tags..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg font-bricolage focus:outline-none focus:border-beagle-orange focus:ring-1 focus:ring-beagle-orange"
+              className="w-full px-4 py-2 pl-11 border border-gray-300 rounded-lg font-bricolage focus:outline-none focus:border-beagle-orange focus:ring-1 focus:ring-beagle-orange transition"
             />
+            <svg
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                title="Clear search"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            )}
           </div>
-        )}
+          {!loading && programs.length === 0 && total > 0 && (
+            <p className="text-xs text-gray-500 mt-2">
+              No results found. Try a different search term.
+            </p>
+          )}
+        </div>
 
         {loading ? (
           <div className="text-center py-12">
@@ -197,14 +221,36 @@ export default function AdminProgramsListPage() {
           </div>
         ) : filteredPrograms.length === 0 ? (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-            <p className="text-gray-600">No programs found matching "{searchQuery}"</p>
+            <svg className="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <p className="text-gray-600 mb-2">No programs found matching <span className="font-semibold">"{searchQuery}"</span></p>
+            <p className="text-xs text-gray-500">Try searching by name, slug, URL, or tags</p>
           </div>
         ) : (
           <div>
             {/* Results count */}
-            <p className="text-sm text-gray-600 mb-4">
-              Showing {filteredPrograms.length} of {total} program(s)
-            </p>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm text-gray-600">
+                {debouncedSearch ? (
+                  <>
+                    Found <span className="font-semibold text-beagle-dark">{filteredPrograms.length}</span> of <span className="font-semibold text-beagle-dark">{total}</span> program(s) matching "{debouncedSearch}"
+                  </>
+                ) : (
+                  <>
+                    Showing <span className="font-semibold text-beagle-dark">{filteredPrograms.length}</span> of <span className="font-semibold text-beagle-dark">{total}</span> program(s)
+                  </>
+                )}
+              </p>
+              {debouncedSearch && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="text-xs text-beagle-orange hover:underline"
+                >
+                  Clear search
+                </button>
+              )}
+            </div>
 
             {/* Table */}
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
