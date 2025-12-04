@@ -21,9 +21,9 @@ export function middleware(request: NextRequest) {
       return new NextResponse('Not Found', { status: 404 });
     }
 
-    // Allow /programs/*, /api/beagle-programs, and /api/opt-out-responses routes
+    // Allow /programs/*, /api/beagle-programs, /api/opt-out-responses, and /api/opt-in-responses routes
     // (everything else also returns 404)
-    if (!pathname.startsWith('/programs') && !pathname.startsWith('/api/beagle-programs') && !pathname.startsWith('/api/opt-out-responses')) {
+    if (!pathname.startsWith('/programs') && !pathname.startsWith('/api/beagle-programs') && !pathname.startsWith('/api/opt-out-responses') && !pathname.startsWith('/api/opt-in-responses')) {
       return new NextResponse('Not Found', { status: 404 });
     }
   }

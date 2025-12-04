@@ -135,8 +135,15 @@ export default function BeagleProgramPagePreview({
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to submit upgrade selection');
+        let errorMessage = 'Failed to submit upgrade selection';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          // If response is not JSON, use status text
+          errorMessage = response.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
 
       setUpgradeSuccess(true);
