@@ -106,12 +106,22 @@ export default function OptInForm({
 
       if (!response.ok) {
         let errorMessage = 'Failed to submit opt-in response';
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorMessage;
-        } catch {
-          // If response is not JSON, use status text
-          errorMessage = response.statusText || errorMessage;
+        
+        // Handle specific HTTP status codes with friendly messages
+        if (response.status === 404) {
+          errorMessage = 'This form is no longer available. Please refresh the page.';
+        } else if (response.status === 429) {
+          errorMessage = 'Too many requests. Please wait a moment and try again.';
+        } else if (response.status === 500) {
+          errorMessage = 'Something went wrong. Please try again in a moment.';
+        } else {
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.error || errorMessage;
+          } catch {
+            // If response is not JSON, use generic message
+            errorMessage = 'Something went wrong. Please try again.';
+          }
         }
         throw new Error(errorMessage);
       }
