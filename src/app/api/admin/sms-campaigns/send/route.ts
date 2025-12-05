@@ -116,7 +116,7 @@ export async function POST(
     return NextResponse.json(
       {
         success: false,
-        error: err instanceof Error ? err.message : 'Failed to send campaign',
+        error: err instanceof Error ? err.message : 'Failed to send notice',
       } as SendCampaignResponse,
       { status: 500 }
     );

@@ -21,9 +21,9 @@ export function middleware(request: NextRequest) {
       return new NextResponse('Not Found', { status: 404 });
     }
 
-    // Allow /programs/*, /api/beagle-programs, /api/opt-out-responses, /api/opt-in-responses, and /api/upgrade-selections routes
+    // Allow /programs/*, /api/beagle-programs, /api/opt-out-responses, /api/opt-in-responses, /api/upgrade-selections, /api/admin/send-notices, and /api/admin/upload-partner-logo routes
     // (everything else also returns 404)
-    if (!pathname.startsWith('/programs') && !pathname.startsWith('/api/beagle-programs') && !pathname.startsWith('/api/opt-out-responses') && !pathname.startsWith('/api/opt-in-responses') && !pathname.startsWith('/api/upgrade-selections')) {
+    if (!pathname.startsWith('/programs') && !pathname.startsWith('/api/beagle-programs') && !pathname.startsWith('/api/opt-out-responses') && !pathname.startsWith('/api/opt-in-responses') && !pathname.startsWith('/api/upgrade-selections') && !pathname.startsWith('/api/admin/send-notices') && !pathname.startsWith('/api/admin/upload-partner-logo')) {
       return new NextResponse('Not Found', { status: 404 });
     }
   }
@@ -31,7 +31,10 @@ export function middleware(request: NextRequest) {
   // Check authentication for admin routes (on any domain except beaglenotice.com)
   if (!host.includes('beaglenotice.com') && pathname.startsWith('/admin')) {
     // Allow login page without auth
-    if (pathname === '/admin/login' || pathname.startsWith('/api/admin/login')) {
+    if (
+      pathname === '/admin/login' ||
+      pathname.startsWith('/api/admin/login')
+    ) {
       return NextResponse.next();
     }
 

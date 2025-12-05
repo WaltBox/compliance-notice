@@ -159,3 +159,51 @@ model SmsCampaignLog {
   @@index([createdAt])
 }
 
+model EmailCampaignLog {
+  id                                  String   @id @default(cuid())
+  createdAt                           DateTime @default(now())
+  updatedAt                           DateTime @updatedAt
+
+  // Campaign metadata
+  campaignId                          String   // Unique identifier for the campaign
+  subject                             String   // Email subject line
+  messagePreview                      String?  // First 100 chars of message for reference
+
+  // Campaign statistics
+  totalRecipients                     Int      // Total number of recipients in campaign
+  successfulSends                     Int      @default(0)
+  failedSends                         Int      @default(0)
+
+  // Individual email records
+  emailRecipients                     EmailRecipient[]
+
+  @@index([campaignId])
+  @@index([createdAt])
+}
+
+model EmailRecipient {
+  id                                  String   @id @default(cuid())
+  createdAt                           DateTime @default(now())
+
+  // Link to campaign
+  campaignId                          String
+  campaign                            EmailCampaignLog @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  // Recipient details
+  tenantName                          String   // Full name from CSV
+  firstName                           String   // Extracted first name
+  email                               String   // Email address
+
+  // Send status
+  status                              String   // "pending", "sent", "failed", "bounced"
+  error                               String?  // Error message if failed
+
+  // Optional metadata
+  property                            String?  // Property name
+  unit                                String?  // Unit number
+
+  @@index([campaignId])
+  @@index([email])
+  @@index([status])
+}
+
