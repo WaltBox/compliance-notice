@@ -169,7 +169,7 @@ export default function AdminProgramsListPage() {
         )}
 
         {/* Search Bar */}
-        <div className="mb-6">
+          <div className="mb-6">
           <div className="relative">
             <input
               type="text"
@@ -202,7 +202,7 @@ export default function AdminProgramsListPage() {
             <p className="text-xs text-gray-500 mt-2">
               No results found. Try a different search term.
             </p>
-          )}
+        )}
         </div>
 
         {loading ? (

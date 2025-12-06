@@ -98,7 +98,7 @@ export default function OptOutForm({
       if (!response.ok) {
         let errorMessage = 'Something went wrong try again later';
         try {
-          const errorData = await response.json();
+        const errorData = await response.json();
           // Use API error if available, but fallback to generic message
           if (errorData.error && typeof errorData.error === 'string') {
             errorMessage = errorData.error;

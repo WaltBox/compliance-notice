@@ -63,12 +63,12 @@ export async function POST(request: NextRequest) {
       throw error;
     }
 
-    // Get public URL
-    const { data: publicData } = supabase.storage
+    // Get public URL (synchronous call, not async)
+    const { data: publicUrlData } = supabase.storage
       .from('partner-logos')
       .getPublicUrl(fileName);
 
-    const publicUrl = publicData?.publicUrl;
+    const publicUrl = publicUrlData?.publicUrl;
 
     if (!publicUrl) {
       throw new Error('Failed to generate public URL');

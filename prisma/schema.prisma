@@ -198,10 +198,6 @@ model EmailRecipient {
   status                              String   // "pending", "sent", "failed", "bounced"
   error                               String?  // Error message if failed
 
-  // Optional metadata
-  property                            String?  // Property name
-  unit                                String?  // Unit number
-
   @@index([campaignId])
   @@index([email])
   @@index([status])

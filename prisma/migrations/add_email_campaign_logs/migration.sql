@@ -47,3 +47,4 @@ CREATE INDEX "EmailRecipient_status_idx" ON "EmailRecipient"("status");
 -- AddForeignKey
 ALTER TABLE "EmailRecipient" ADD CONSTRAINT "EmailRecipient_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "EmailCampaignLog"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
+

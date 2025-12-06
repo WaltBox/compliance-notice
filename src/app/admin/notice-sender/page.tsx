@@ -33,7 +33,8 @@ export default function NoticeSenderPage() {
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [parseResult, setParseResult] = useState<ParseResult | null>(null);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [logoSuccess, setLogoSuccess] = useState('');
+  const [sendSuccess, setSendSuccess] = useState('');
 
   // Form fields
   const [templateType, setTemplateType] = useState<'complianceNotice' | 'optOut' | 'optIn'>('complianceNotice');
@@ -51,6 +52,10 @@ export default function NoticeSenderPage() {
   const [sendResults, setSendResults] = useState<SendResponse | null>(null);
   const [showErrors, setShowErrors] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  
+  // Logo upload state
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoUploading, setLogoUploading] = useState(false);
 
   // Check authentication on mount
   useEffect(() => {
@@ -68,36 +73,62 @@ export default function NoticeSenderPage() {
     router.push('/admin/login');
   };
 
-  const handlePartnerLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePartnerLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
+    
+    setLogoFile(file);
     setError('');
+    setLogoSuccess('');
+    uploadLogoFile(file);
+  };
+
+  const uploadLogoFile = async (file: File) => {
+    if (!file) return;
+    
+    setLogoUploading(true);
+    setError('');
+    setLogoSuccess('');
 
     try {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('fileName', `${propertyManagementName?.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}${file.name.substring(file.name.lastIndexOf('.'))}`);
 
+      const token = getAdminToken();
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
       const response = await fetch('/api/admin/upload-partner-logo', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${getAdminToken()}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: formData,
       });
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Upload failed: ${response.status}`);
+      }
+
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Upload failed');
+      if (!data.url) {
+        throw new Error('No URL returned from upload');
       }
 
       setPartnerLogoUrl(data.url);
-      setSuccess('Logo uploaded successfully!');
-      setTimeout(() => setSuccess(''), 3000);
+      setLogoFile(null);
+      setLogoSuccess('Logo uploaded successfully');
+      setTimeout(() => setLogoSuccess(''), 5000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
+      const errorMsg = err instanceof Error ? err.message : 'Upload failed';
+      console.error('Logo upload error:', errorMsg);
+      setError(errorMsg);
+    } finally {
+      setLogoUploading(false);
     }
   };
 
@@ -182,7 +213,7 @@ export default function NoticeSenderPage() {
 
     if (!linkUrl.trim()) {
       setError('Please enter a link URL');
-      return;
+        return;
     }
 
     setShowConfirmation(true);
@@ -225,24 +256,10 @@ export default function NoticeSenderPage() {
 
       const result: SendResponse = await response.json();
       setSendResults(result);
-      setSuccess(
-        `Campaign sent! ${result.successful} successful, ${result.failed} failed.`
+      setSendSuccess(
+        `${result.successful} emails sent${result.failed > 0 ? `, ${result.failed} failed` : ''}`
       );
-
-      // Reset form after 3 seconds
-      setTimeout(() => {
-        setCsvFile(null);
-        setParseResult(null);
-        setTemplateType('complianceNotice');
-        setSubject('Action Required: Renters Insurance Requirement; automatically enrolled in Beagle coverage');
-        setCustomMessage(DEFAULT_MESSAGES.complianceNotice);
-        setLinkUrl('');
-        setLinkText('View Details');
-        setPropertyManagementName('');
-        setPartnerLogoUrl('');
-        setSuccess('');
-        setSendResults(null);
-      }, 3000);
+      // Success message stays until refresh (no auto-clear)
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Failed to send campaign'
@@ -280,15 +297,15 @@ export default function NoticeSenderPage() {
               >
                 + New Notice
               </Link>
-              <button
-                onClick={handleLogout}
+            <button
+              onClick={handleLogout}
                 className="text-beagle-dark px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition"
-              >
-                Logout
-              </button>
+            >
+              Logout
+            </button>
             </div>
           </div>
-
+          
           {/* Navigation Tabs */}
           <nav className="flex gap-8">
             <Link
@@ -314,11 +331,6 @@ export default function NoticeSenderPage() {
           </div>
         )}
 
-        {success && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-4">
-            {success}
-          </div>
-        )}
 
         <div>
           {/* Subheader */}
@@ -346,7 +358,7 @@ export default function NoticeSenderPage() {
               type="file"
               accept=".csv"
               onChange={handleFileChange}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-beagle-orange hover:file:bg-orange-100"
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-beagle-orange hover:file:bg-orange-100 p-2 border border-dashed border-gray-300 rounded"
             />
 
             {csvFile && (
@@ -363,16 +375,16 @@ export default function NoticeSenderPage() {
                     {parseResult.stats.validCount} valid email address
                     {parseResult.stats.validCount !== 1 ? 'es' : ''}
                   </span>
-                </div>
+              </div>
 
                 {parseResult.stats.invalidCount > 0 && (
                   <div className="text-orange-600 text-sm">
                     ⚠ {parseResult.stats.invalidCount} invalid/missing emails
                     (will be skipped)
-                  </div>
-                )}
-              </div>
-            )}
+          </div>
+        )}
+          </div>
+        )}
           </div>
 
           {/* Step 2: Customize Message */}
@@ -384,7 +396,7 @@ export default function NoticeSenderPage() {
             {/* Template Type Selection */}
             <div className="mb-6 p-4 bg-beagle-light rounded-lg border border-orange-200">
               <p className="text-sm font-semibold text-beagle-dark mb-3">Template Type:</p>
-              <div className="space-y-2">
+            <div className="space-y-2">
                 <label className="flex items-center gap-3 cursor-pointer p-2 hover:bg-white rounded transition">
                   <input
                     type="radio"
@@ -466,7 +478,7 @@ export default function NoticeSenderPage() {
               <p className="text-xs text-gray-500 mt-1">
                 Keep it short - users should spend &lt;10 seconds reading and click the link.
               </p>
-            </div>
+                    </div>
 
             {/* Link URL */}
             <div className="mb-4">
@@ -480,7 +492,7 @@ export default function NoticeSenderPage() {
                 placeholder="https://www.beaglenotice.com/programs/ampere-property-management"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-beagle-orange focus:border-transparent"
               />
-            </div>
+                </div>
 
             {/* Button Text */}
             <div className="mb-4">
@@ -511,7 +523,7 @@ export default function NoticeSenderPage() {
               <p className="text-xs text-gray-500 mt-1">
                 This will be displayed in the email footer.
               </p>
-            </div>
+          </div>
 
             {/* Partner Logo Upload */}
             <div className="mb-6">
@@ -521,24 +533,61 @@ export default function NoticeSenderPage() {
               <p className="text-xs text-gray-600 mb-3">
                 Upload your company logo to display alongside Beagle logo in emails.
               </p>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handlePartnerLogoUpload}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-beagle-orange hover:file:bg-orange-100"
-              />
-              {partnerLogoUrl && (
-                <div className="mt-3 p-3 bg-beagle-light rounded border">
-                  <p className="text-xs text-gray-600 mb-2 font-semibold">Preview:</p>
-                  <img
-                    src={partnerLogoUrl}
-                    alt="Partner Logo"
-                    style={{ maxHeight: '60px', maxWidth: '200px' }}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
+              
+              {/* File Upload with Retry Button */}
+              <div className="flex gap-2 items-start">
+                <div className="flex-1">
+                  <input
+                    id="logo-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePartnerLogoSelect}
+                    disabled={logoUploading}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-beagle-orange hover:file:bg-orange-100 disabled:opacity-50 p-2 border border-dashed border-gray-300 rounded"
                   />
-                  <p className="text-xs text-green-600 mt-2">✓ Uploaded</p>
+                  {logoUploading && (
+                    <p className="text-xs text-blue-600 mt-1">uploading...</p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (logoFile) {
+                      uploadLogoFile(logoFile);
+                    } else {
+                      const input = document.getElementById('logo-upload') as HTMLInputElement;
+                      if (input) input.click();
+                    }
+                  }}
+                  disabled={logoUploading}
+                  className="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 transition whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Image didn't upload? Click here
+                </button>
+              </div>
+
+
+              {/* Logo Preview with Retry Button on Right */}
+              {partnerLogoUrl && (
+                <div className="mt-3 p-3 bg-beagle-light rounded border flex justify-between items-center">
+                  <div>
+                    <p className="text-xs text-gray-600 font-semibold mb-2">✓ Logo Uploaded:</p>
+                    <img
+                      key={partnerLogoUrl}
+                      src={partnerLogoUrl}
+                      alt="Partner Logo"
+                      style={{ maxHeight: '60px', maxWidth: '200px' }}
+                    />
+                  </div>
+                  {logoFile && !logoUploading && (
+                    <button
+                      type="button"
+                      onClick={() => uploadLogoFile(logoFile)}
+                      className="text-xs px-3 py-2 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 transition border border-yellow-300 ml-4 flex-shrink-0"
+                    >
+                      Image didn't upload?<br/>Click to retry
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -546,7 +595,7 @@ export default function NoticeSenderPage() {
             {/* Preview */}
             <div className="p-0 bg-white rounded-lg border border-gray-300 overflow-hidden">
               <p className="text-xs text-gray-600 px-4 pt-4 pb-2 font-semibold">
-                EMAIL PREVIEW:
+                EMAIL PREVIEW (loads the first name it finds from the uploaded CSV):
               </p>
               {/* Email Container */}
               <div className="mx-4 mb-4 bg-white border-2 border-beagle-orange rounded-lg overflow-hidden shadow-sm">
@@ -580,7 +629,7 @@ export default function NoticeSenderPage() {
                 {/* Email Content */}
                 <div className="px-6 py-6 space-y-4">
                   <p className="text-sm font-semibold text-beagle-dark">
-                    Hi [Tenant Name],
+                    Hi {parseResult?.valid[0]?.firstName || '[Tenant Name]'},
                   </p>
                   <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
                     {customMessage || '[Your message]'}
@@ -641,12 +690,14 @@ export default function NoticeSenderPage() {
                 3. Send Notice
               </h3>
 
-              <button
-                onClick={handleSendClick}
-                disabled={!canSend || isSending}
+            <button
+              onClick={handleSendClick}
+                disabled={!canSend || isSending || !!sendSuccess}
                 className="w-full bg-beagle-orange hover:bg-opacity-90 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition"
               >
-                {isSending
+                {sendSuccess 
+                  ? sendSuccess 
+                  : isSending
                   ? 'Sending...'
                   : `Send to ${parseResult.stats.validCount} Tenant${
                       parseResult.stats.validCount !== 1 ? 's' : ''
@@ -672,7 +723,7 @@ export default function NoticeSenderPage() {
                         className="ml-2 underline hover:no-underline"
                       >
                         {showErrors ? 'Hide' : 'Show'} errors
-                      </button>
+            </button>
 
                       {showErrors && (
                         <div className="mt-2 text-xs bg-red-50 p-3 rounded max-h-48 overflow-y-auto space-y-1">
@@ -690,7 +741,7 @@ export default function NoticeSenderPage() {
                   )}
                 </div>
               )}
-            </div>
+          </div>
           )}
         </div>
 

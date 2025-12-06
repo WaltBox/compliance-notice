@@ -18,8 +18,6 @@ interface TenantEmail {
   tenant: string;
   firstName?: string;  // Optional, will be extracted if not provided
   email: string;
-  property?: string;
-  unit?: string;
 }
 
 interface SendNoticesRequest {
@@ -106,8 +104,6 @@ export async function POST(request: NextRequest) {
             email: '',
             status: 'failed',
             error: 'No email address',
-            property: tenant.property,
-            unit: tenant.unit,
           },
         });
 
@@ -157,8 +153,6 @@ export async function POST(request: NextRequest) {
               firstName,
               email: tenant.email,
               status: 'sent',
-              property: tenant.property,
-              unit: tenant.unit,
             },
           });
         } else {
@@ -179,8 +173,6 @@ export async function POST(request: NextRequest) {
               email: tenant.email,
               status: 'failed',
               error: result.error,
-              property: tenant.property,
-              unit: tenant.unit,
             },
           });
         }
@@ -203,8 +195,6 @@ export async function POST(request: NextRequest) {
             email: tenant.email,
             status: 'failed',
             error: errorMsg,
-            property: tenant.property,
-            unit: tenant.unit,
           },
         });
       }

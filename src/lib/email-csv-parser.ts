@@ -11,8 +11,6 @@ export interface TenantRow {
   firstName: string;       // Extracted first name for personalization
   fullName: string;        // First Last format (no middle)
   email: string;
-  property?: string;
-  unit?: string;
 }
 
 export interface InvalidRow {
@@ -119,7 +117,10 @@ export function parseEmailCSV(csvContent: string): ParseResult {
       );
     }
 
-    console.log('Using columns:', { tenant: tenantCol, email: emailCol });
+    console.log('Using columns:', { 
+      tenant: tenantCol, 
+      email: emailCol
+    });
 
     const valid: TenantRow[] = [];
     const invalid: InvalidRow[] = [];
@@ -128,8 +129,6 @@ export function parseEmailCSV(csvContent: string): ParseResult {
     parsed.data.forEach((row: any, index: number) => {
       const tenant = row[tenantCol]?.trim();
       const email = row[emailCol]?.trim();
-      const property = row['Property']?.trim();
-      const unit = row['Unit']?.trim();
 
       // Skip empty rows or header rows
       if (!tenant || tenant === '' || tenant.toLowerCase() === 'total') {
@@ -161,9 +160,7 @@ export function parseEmailCSV(csvContent: string): ParseResult {
         tenant,
         firstName: extractFirstName(tenant),
         fullName: extractFullName(tenant),
-        email: email.toLowerCase(),
-        property,
-        unit
+        email: email.toLowerCase()
       });
     });
 
